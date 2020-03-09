@@ -19,10 +19,10 @@ global isLicensed = undefined
 global owner = undefined
 global registeredTo = ""
 
-	rollout globalWelcome "WELCOME TO THE WORLD OF FSTRUCTX !" width:800 height:175
+	rollout globalWelcome "WELCOME TO THE WORLD OF FSTRUCTX !" width:480 height:240
 	(
 		--local tempFstructxAssistFolder = pathConfig.GetDir #temp + "\\tempFstructxAssistFolder"
-		local fstructxInstFolder = pathConfig.GetDir #userscripts + "\\BorakaScriptPack_vol1"
+		global fstructxInstFolder = pathConfig.GetDir #userscripts + "\\BorakaScriptPack_vol1"
 
 		local dotcolor = (dotnetclass "System.Drawing.Color").FromArgb
 		local bgcolor = dotcolor 68 68 68 
@@ -30,44 +30,51 @@ global registeredTo = ""
 		local bluecolor = dotcolor 0 186 255
 		local redcolor = dotcolor 255 0 0
 		
-
-		dotnetcontrol lblWelcome "Label" text:"1" width:780 height:90 pos:[10,20]
-		dotnetcontrol lblProceed "Label" text:"" width:360 height:24 pos:[25,95]
-		dotnetcontrol lblLicense "Label" text:"2" width:280 height:60 pos:[10,142]
-		dotnetcontrol lblregDate "Label" text:"" width:90 height:24 pos:[230,138]
+		dotnetcontrol lblWelcome "Label" text:"1" width:780 height:90 pos:[20,20]
+		dotnetcontrol lblProceed "Label" text:"" width:((globalWelcome.width)-40) height:24 pos:[25,95]
+		dotnetcontrol lblLicense "Label" text:"2" width:235 height:24 pos:[10,200]
+		dotnetcontrol lblregDate "Label" text:"" width:(((globalWelcome.width)-40)-((lblLicense.width)+20)) height:24 pos:[230,140]
 		
 		local labels = #(lblWelcome, lblProceed, lblLicense, lblregDate)
 		local bcolors = #(bgcolor, bgcolor, bgcolor, bgcolor)
 		local fcolors = #(fgcolor, bluecolor, fgcolor, bluecolor)
 		local fonts = #("", "", "", "")
-		local sizes = #(40, 11, 9, 12)
+		local sizes = #(32, 11, 8, 12)
 		
-		checkbutton showInfo "INSTALL INFORMATION" pos:[630,125] width:140 height:35 enabled:true border:true
-		checkbutton install "INSTALL" pos:[320,125] width:140 height:35 enabled:true border:true
-		checkbutton uninstall "UNINSTALL" pos:[475,125] width:140 height:35 enabled:true border:true
+		local btnVertPos = 140
+		local btnW = 130
+		local btnH = 30
+		local space = 146
+		local btnInstallPos = 25
+		local btnUninstallPos = btnInstallPos + space
+		local btnInstr = btnUninstallPos + space
+
+		checkbutton install "INSTALL" pos:[btnInstallPos,btnVertPos] width:btnW height:btnH enabled:true border:true
+		checkbutton uninstall "UNINSTALL" pos:[btnUninstallPos,btnVertPos] width:btnW height:btnH enabled:true border:true
+		checkbutton showInstr "INSTRUCTIONS" pos:[btnInstr,btnVertPos] width:btnW height:btnH enabled:true border:true
 
 		-- INSTALL START
 		fn installMethod = 
 		(
 			--------------------------------------------------------#TODO #Implement #install
 			local extractDir = @"C:\Users\Public\Documents\fStructX"
-			local mzpFilename = @"M:\Z_Software Assets\3ds Max\BorakaScriptPack_vol1\BorakaScriptPack_vol1.mzp"
+			local mzpFilename = @"C:\Users\riffraff\Dropbox\Scripting\maxscript\9_Final script\fStructX_UVPrinter_000Exporter.mzp"
 			local dropFile = "welcome.ms"
+
 			if msZip.fileInPackage mzpFilename extractDir then 
 			( 
-				
+				msZip.unloadPackage mzpFilename extractDir dropFile 
+				colorMan.reiniticons()
 			) 
-			msZip.unloadPackage mzpFilename extractDir dropFile 
-			colorMan.reiniticons()
+
 		)
-		
 		
 		on install changed state do
 		(
 			if (state == true) then
 			(
 				installMethod()
-				lblProceed.Text = toUpper "fStructX_vol.1 - installed successfully !"
+				lblProceed.Text = toUpper "installed successfully !"
 			)
 			install.checked = false			
 		)
@@ -79,7 +86,7 @@ global registeredTo = ""
 			try ( DOSCommand ("rmDir \"" + rootDir + "\" /s /q") ) catch (messagebox "Can't delete fStructX folders!" title:"fStructX uninstall message!!!")
 		)
 		
-		fn getFilesRecursive root pattern =
+		fn deleteFilesRecursive root pattern =
 		(	
 			my_files = #()    
 			dir_array = GetDirectories (root+"/*")
@@ -94,20 +101,20 @@ global registeredTo = ""
 		fn uninstallMethod =
 		(
 			-- deleting files
-			getFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.mat"
-			getFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.mtl"
-			getFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.ms"
-			getFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.jpg"
-			getFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.mcr"
-			getFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.run"
-			getFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.bmp"
-			getFilesRecursive @"$usericons\" "BorakaIconsPackVol1_*.bmp"
-			getFilesRecursive @"$usermacros\" "BorakaScriptPack_*.mcr"
-			getFilesRecursive @"$temp\" "welcome.ms"
-			getFilesRecursive @"$temp\" "insComp.ms"
+			deleteFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.mat"
+			deleteFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.mtl"
+			deleteFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.ms"
+			deleteFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.jpg"
+			deleteFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.mcr"
+			deleteFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.run"
+			deleteFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.bmp"
+			deleteFilesRecursive @"$usericons\" "BorakaIconsPackVol1_*.bmp"
+			deleteFilesRecursive @"$usermacros\" "BorakaScriptPack_*.mcr"
+			deleteFilesRecursive @"$temp\" "welcome.ms"
+			deleteFilesRecursive @"$temp\" "insComp.ms"
 			
-			showInfo.checked = false
-			--destroyDialog loadInstInfo
+			showInstr.checked = false
+			destroyDialog loadInstInfo
 			
 			if (fstructxInstFolder != "") then DeleteDirAndSubDir fstructxInstFolder
 			colorMan.reiniticons()
@@ -118,7 +125,7 @@ global registeredTo = ""
 			if (state == true) then
 			(
 				uninstallMethod()
-				lblProceed.Text = toUpper "fStructX_vol.1 - uninstalled successfully !"
+				lblProceed.Text = toUpper "uninstalled successfully !"
 			)
 			uninstall.checked = false
 		)
@@ -135,15 +142,15 @@ global registeredTo = ""
 				(
 					insTructions = "INSTRUCTIONS : " + "\n" + "\n" + "Customize   ->  Customize User Interface   ->  Toolbars   ->  Category: BorakaScriptPack_vol1   ->" + "\n" + "\n"
 					insTructions2 =	"New   - >  Set name  ->   Drag some of the scripts in the pop-up window  ->  Set the icon on the toolbar !" + "\r"
-					loadInfo.text = (insTructions + insTructions2)
+					userscriptsPath = "\r#userscripts\r" + (pathConfig.GetDir #userscripts) + "\n"
+					loadInfo.text = (insTructions + insTructions2 + userscriptsPath)
 				)
 			)
 			
 			createDialog loadInstInfo pos:[(getDialogpos globalWelcome)[1]+globalWelcome.width + 9,(getDialogPos globalWelcome)[2]+globalWelcome.height - (162-18)] parent:globalWelcome.hwnd style:#()
-
 		)
 		
-		on showInfo changed state do
+		on showInstr changed state do
 		(
 			if (state == true) then
 			(
@@ -168,88 +175,99 @@ global registeredTo = ""
 			format "AUTHOR : '%' \n" fileOwner.value
 			ownerPerson = fileOwner.value
 			
-			if (ownerPerson == "RIFFRAFF\riffraff") then
-			(
-				messagebox "kur" beep:false
-			)
-
-			
-			 owner = ""
-			 license = ""
+			 local owner = ""
+			 local license = ""
+			 local unlimit = "UNLIMITED"
+			 local noreg = "UNREGISTERED"
+			 local reg = 2021
+			 local lic = true
+			 local nolic = false
 			
 				if(doesFileExist pathToChekerFile == true) then
 				(
-					if(fileOwner.value == "PIXELPOOL\BorisoB")then
+					if (ownerPerson == "RIFFRAFF\riffraff") then
 					(
-						owner = "Borislav !"
-						isLicensed = true
-						registeredTo = "UNLIMIT"
+						owner = "Borislav" + " !"
+						isLicensed = lic
+						registeredTo = if isLicensed == nolic then noreg else unlimit
 					)
-					else if(fileOwner.value == "PIXELPOOL\Ana.Nedyalkova")then
+					else if(ownerPerson == "PIXELPOOL\BorisoB")then
 					(
-						owner = "Ana !"
-						isLicensed = true
-						registeredTo = 2020
+						owner = "Borislav" + " !"
+						isLicensed = lic
+						registeredTo = if isLicensed == nolic then noreg else unlimit
 					)
-					else if(fileOwner.value == "PIXELPOOL\DimovD")then
+					else if(ownerPerson == "PIXELPOOL\Ana.Nedyalkova")then
 					(
-						owner = "Didara !"
-						isLicensed = true
-						registeredTo = 2020
+						owner = "Ana" + " !"
+						isLicensed = lic
+						registeredTo = if isLicensed == nolic then noreg else reg
 					)
-					else if(fileOwner.value == "PIXELPOOL\MincheM")then
+					else if(ownerPerson == "PIXELPOOL\KovachA")then
 					(
-						owner = "Marina !"
-						isLicensed = true
-						registeredTo = 2020
+						owner = "Alexander" + " !"
+						isLicensed = lic
+						registeredTo = if isLicensed == nolic then noreg else reg
 					)
-					else if(fileOwner.value == "PIXELPOOL\GaidarH")then
+					else if(ownerPerson == "PIXELPOOL\DimovD")then
 					(
-						owner = "Hristiyana !"
-						isLicensed = true
-						registeredTo = 2020
+						owner = "Didara" + " !"
+						isLicensed = lic
+						registeredTo = if isLicensed == nolic then noreg else reg
 					)
-					else if(fileOwner.value == "PIXELPOOL\GetzovP")then
+					else if(ownerPerson == "PIXELPOOL\MincheM")then
 					(
-						owner = "Petya !"
-						isLicensed = true
-						registeredTo = 2020
+						owner = "Marina" + " !"
+						isLicensed = lic
+						registeredTo = if isLicensed == nolic then noreg else reg
 					)
-					else if(fileOwner.value == "PIXELPOOL\YankovM")then
+					else if(ownerPerson == "PIXELPOOL\GaidarH")then
 					(
-						owner = "Mariya !"
-						isLicensed = true
-						registerTo = 2020
+						owner = "Hristiyana" + " !"
+						isLicensed = lic
+						registeredTo = if isLicensed == nolic then noreg else reg
 					)
-					else if(fileOwner.value == "PIXELPOOL\KurtevZ")then
+					else if(ownerPerson == "PIXELPOOL\GetzovP")then
 					(
-						owner = "Zara !"
-						isLicensed = true
-						registeredTo = 2020
+						owner = "Petya" + " !"
+						isLicensed = lic
+						registeredTo = if isLicensed == nolic then noreg else reg
 					)
-					else if(fileOwner.value == "PIXELPOOL\NenkovE")then
+					else if(ownerPerson == "PIXELPOOL\YankovM")then
 					(
-						owner = "Mims !"
-						isLicensed = true
-						registeredTo = 2020
+						owner = "Mariya" + " !"
+						isLicensed = lic
+						registeredTo = if isLicensed == nolic then noreg else reg
 					)
-					else if(fileOwner.value == "PIXELPOOL\DancheM")then
+					else if(ownerPerson == "PIXELPOOL\KurtevZ")then
 					(
-						owner = "Margarita !"
-						isLicensed = true
-						registeredTo = 2020
+						owner = "Zara" + " !"
+						isLicensed = lic
+						registeredTo = if isLicensed == nolic then noreg else reg
 					)
-					else if(fileOwner.value == "PIXELPOOL\GoncheM")then
+					else if(ownerPerson == "PIXELPOOL\NenkovE")then
 					(
-						owner = "Mariya !"
-						isLicensed = true
-						registeredTo = 2020
+						owner = "Mims" + " !"
+						isLicensed = lic
+						registeredTo = if isLicensed == nolic then noreg else reg
+					)
+					else if(ownerPerson == "PIXELPOOL\DancheM")then
+					(
+						owner = "Margarita" + " !"
+						isLicensed = lic
+						registeredTo = if isLicensed == nolic then noreg else reg
+					)
+					else if(ownerPerson == "PIXELPOOL\GoncheM")then
+					(
+						owner = "Mariya" + " !"
+						isLicensed = lic
+						registeredTo = if isLicensed == nolic then noreg else reg
 					)
 					else
 					(
-						owner = "Guest !"
-						isLicensed = true
-						registeredTo = "UNREG."
+						owner = "Guest" + " !"
+						isLicensed = lic
+						registeredTo = if isLicensed == nolic then noreg else reg
 					)
 				)
 				
@@ -261,7 +279,7 @@ global registeredTo = ""
 			--IF THE USER IS  REGISTERED 
 			if(isLicensed == true) then
 			(
-				lblregDate.pos = [200,138]
+				lblregDate.pos = [(lblLicense.width),(lblLicense.pos[2]-4)]
 				lblregDate.Forecolor = bluecolor
 				lblregDate.Backcolor = bgcolor
 			)
@@ -270,23 +288,20 @@ global registeredTo = ""
 			--IF THE USER IS NOT REGISTERED -- INSTALATION IS CANCELED AND DISABLED
 			if(isLicensed == false) then
 			(
-				space = "                                                             "
-				space2 = "               "
 				--hide the buttons
-				showInfo.visible = false
+				showInstr.visible = false
 				install.visible = false
 				uninstall.visible = false
 				
 				--rearange labels to fit 
 				lblWelcome.Text = lblWelcome.Text
-				lblProceed.width = 600
-				--lblProceed.Text = toUpper (space + "Sorry  !  instalation is canceled and disabled !")
-				lblLicense.pos = [5,142]
-				lblregDate.pos = [220,138]
-				
-				--set reg color to red
-				lblregDate.Forecolor = redcolor
+
 				lblProceed.Forecolor = redcolor
+				
+				lblLicense.width = (lblLicense.width) + 30
+
+				lblregDate.pos = [(lblLicense.width),(lblLicense.pos[2]-4)]
+				lblregDate.Forecolor = redcolor
 			)
 		)
 		
@@ -314,7 +329,7 @@ global registeredTo = ""
 			)
 			if(isLicensed == false) then
 			(
-				register = "UNREG."
+				register = registeredTo
 			)
 			
 			return register as string
@@ -358,24 +373,28 @@ global registeredTo = ""
 		on globalWelcome open do
 		(
 			welcome()
-			if checkTheOwner == "Guest !" then
+			 
+			if (isLicensed == false and CheckTheOwner() == "Guest !") then
+			(
 				uninstallMethod()
+			)
 		)
 	)
 	
-	rollout loadInstInfo "INSTALL INFORMATION!" width:300 height:175
-	(
-		label loadInfo "info" text:"" width:280 height:180 pos:[10,10]
-
-		on loadInstInfo open do
-		(
-			insTructions = "INSTRUCTIONS : " + "\n" + "\n" + "Customize   ->  Customize User Interface   ->  Toolbars   ->  Category: BorakaScriptPack_vol1   ->" + "\n" + "\n"
-			insTructions2 =	"New   - >  Set name  ->   Drag some of the scripts in the pop-up window  ->  Set the icon on the toolbar !" + "\r"
-			loadInfo.text = (insTructions + insTructions2)
-			
-		)
-	)
-	
-	createDialog loadInstInfo pos:[(getDialogpos globalWelcome)[1]+globalWelcome.width + 9,(getDialogPos globalWelcome)[2]+globalWelcome.height - (162-18)] parent:globalWelcome.hwnd style:#()
-	destroyDialog loadInstInfo
+--	rollout loadInstInfo "INSTALL INFORMATION!" width:300 height:175
+--	(
+--		label loadInfo "info" text:"" width:280 height:180 pos:[10,10]
+--
+--		on loadInstInfo open do
+--		(
+--			insTructions = "INSTssssssssssssRUCTIONS : " + "\n" + "\n" + "Customize   ->  Customize User Interface   ->  Toolbars   ->  Category: BorakaScriptPack_vol1   ->" + "\n" + "\n"
+--			insTructions2 =	"New   - >  Set name  ->   Drag some of the scripts in the pop-up window  ->  Set the icon on the toolbar !" 
+--			instruction3 = fstructxInstFolder + "\n"
+--			loadInfo.text = (insTructions + insTructions2 + instruction3)
+--			
+--		)
+--	)
+--	
+--	createDialog loadInstInfo pos:[(getDialogpos globalWelcome)[1]+globalWelcome.width + 9,(getDialogPos globalWelcome)[2]+globalWelcome.height - (162-18)] parent:globalWelcome.hwnd style:#()
+--	destroyDialog loadInstInfo
 createDialog globalWelcome pos:[500,400] style:#(#style_sysmenu,#style_toolwindow) 
