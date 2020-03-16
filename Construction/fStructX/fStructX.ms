@@ -74,8 +74,8 @@
 global tempfStructFolder = @"C:\Users\Public\Documents\fStructX\"
 global exportFilelog = @"C:\Users\Public\Documents\fStructX\log.txt"
 global fstructxIniFile = @"C:\Users\Public\Documents\fStructX\fstructXIni.ini"
-global version = "v3.02.6"
-global lastModification = "28 Feb 2020 by RiffRaff"
+global version = "v3.02.7"
+global lastModification = "12 March 2020 by RiffRaff"
 global currentYear = "2020"
 global theCrew = "Borko,Ana,Dido,Mariq,Petya,Zara,Hristiyana,Marina,Mims,Margi,MimiG,Sasho,Andji,Iliqna,Lybomira"
 global aboutInfoAuthorVersion = ""
@@ -1723,7 +1723,7 @@ fn mat =
 				newmat.texmap_bump.normal_map.maplist[2].coords.U_Tiling = 1
 				newmat.texmap_bump.normal_map.maplist[2].coords.V_Tiling = 1
 				newmat.texmap_bump.normal_map.maplist[2].alphaSource = 2
-				newmat.texmap_bump.normal_map.opacity[2] = 30
+				newmat.texmap_bump.normal_map.opacity[2] = 100
 				newmat.texmap_bump.normal_map.blendMode[2] = 14
 
 							
@@ -1744,7 +1744,7 @@ fn mat =
 				newmat.texmap_bump.normal_map.maplist[3].coords.U_Tiling = 1
 				newmat.texmap_bump.normal_map.maplist[3].coords.V_Tiling = 1
 				newmat.texmap_bump.normal_map.maplist[3].alphaSource = 2
-				newmat.texmap_bump.normal_map.opacity[3] = 20
+				newmat.texmap_bump.normal_map.opacity[3] = 100
 				newmat.texmap_bump.normal_map.blendMode[3] = 14
 
 			--fileingamma = 2.2

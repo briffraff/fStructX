@@ -1,4 +1,4 @@
-import MaxPlus as MP
+import MaxPlus as mp
 
 selectionManager = mp.SelectionManager
 

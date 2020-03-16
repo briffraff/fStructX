@@ -1,5 +1,18 @@
-tempfStructFolder = @"C:\Users\Public\Documents\fStructX\"
-exportFilelog = @"C:\Users\Public\Documents\fStructX\log.txt" 
+global fstructxInstFolder = pathConfig.GetDir #userscripts + "\\BorakaScriptPack_vol1"
+global tempfStructFolder = @"C:\Users\Public\Documents\fStructX\"
+global exportFilelog = @"C:\Users\Public\Documents\fStructX\log.txt" 
+global licPath = @"C:\Users\riffraff\Dropbox\Scripting\maxscript\4_Final stage\Config"
+global licName = @"Licenses.ini"
+global licenseFile = licPath + "\\" + licName
+global keyName = "__name__"
+global keyRole = "__role__"
+global keyLic = "__lic__"
+global keyReg = "__reg__"
+global expresion = " !"
+
+global isLicensed = undefined
+global owner = undefined
+global registeredTo = ""
 
 isFolderExist = doesFileExist tempfStructFolder
 if	( isFolderExist == false ) then
@@ -14,16 +27,9 @@ if(doesFileExist exportFilelog == false) then
 )
 
 try ( destroyDialog globalWelcome) catch ()
-	
-global isLicensed = undefined
-global owner = undefined
-global registeredTo = ""
 
 	rollout globalWelcome "WELCOME TO THE WORLD OF FSTRUCTX !" width:480 height:240
 	(
-		--local tempFstructxAssistFolder = pathConfig.GetDir #temp + "\\tempFstructxAssistFolder"
-		global fstructxInstFolder = pathConfig.GetDir #userscripts + "\\BorakaScriptPack_vol1"
-
 		local dotcolor = (dotnetclass "System.Drawing.Color").FromArgb
 		local bgcolor = dotcolor 68 68 68 
 		local fgcolor = dotcolor 255 255 255
@@ -57,8 +63,8 @@ global registeredTo = ""
 		fn installMethod = 
 		(
 			--------------------------------------------------------#TODO #Implement #install
-			local extractDir = @"C:\Users\Public\Documents\fStructX"
-			local mzpFilename = @"C:\Users\riffraff\Dropbox\Scripting\maxscript\9_Final script\fStructX_UVPrinter_000Exporter.mzp"
+			local extractDir = tempfStructFolder
+			local mzpFilename = @"C:\Users\borko\Dropbox\Scripting\maxscript\9_Final script\fStructX_UVPrinter_000Exporter.mzp"
 			local dropFile = "welcome.ms"
 
 			if msZip.fileInPackage mzpFilename extractDir then 
@@ -66,7 +72,6 @@ global registeredTo = ""
 				msZip.unloadPackage mzpFilename extractDir dropFile 
 				colorMan.reiniticons()
 			) 
-
 		)
 		
 		on install changed state do
@@ -74,7 +79,7 @@ global registeredTo = ""
 			if (state == true) then
 			(
 				installMethod()
-				lblProceed.Text = toUpper "installed successfully !"
+				lblProceed.Text = toUpper "Installed successfully !"
 			)
 			install.checked = false			
 		)
@@ -88,7 +93,7 @@ global registeredTo = ""
 		
 		fn deleteFilesRecursive root pattern =
 		(	
-			my_files = #()    
+			my_files = #()
 			dir_array = GetDirectories (root+"/*")
 			for d in dir_array do join dir_array (GetDirectories (d+"/*"))
 			for f in dir_array do join my_files (getFiles (f + pattern))
@@ -100,18 +105,23 @@ global registeredTo = ""
 		
 		fn uninstallMethod =
 		(
+			local userscripts = @"$userScripts\BorakaScriptPack_vol1\"
+			local usermacros = @"$usermacros\"
+			local usericons = @"$usericons\"
+			local temp = @"$temp\"
+			
 			-- deleting files
-			deleteFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.mat"
-			deleteFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.mtl"
-			deleteFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.ms"
-			deleteFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.jpg"
-			deleteFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.mcr"
-			deleteFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.run"
-			deleteFilesRecursive @"$userScripts\BorakaScriptPack_vol1\" "*.bmp"
-			deleteFilesRecursive @"$usericons\" "BorakaIconsPackVol1_*.bmp"
-			deleteFilesRecursive @"$usermacros\" "BorakaScriptPack_*.mcr"
-			deleteFilesRecursive @"$temp\" "welcome.ms"
-			deleteFilesRecursive @"$temp\" "insComp.ms"
+			deleteFilesRecursive userscripts "*.mat"
+			deleteFilesRecursive userscripts "*.mtl"
+			deleteFilesRecursive userscripts "*.ms"
+			deleteFilesRecursive userscripts "*.jpg"
+			deleteFilesRecursive userscripts "*.mcr"
+			deleteFilesRecursive userscripts "*.run"
+			deleteFilesRecursive userscripts "*.bmp"
+			deleteFilesRecursive usermacros "BorakaScriptPack_*.mcr"
+			deleteFilesRecursive usericons "BorakaIconsPackVol1_*.bmp"
+			deleteFilesRecursive temp "welcome.ms"
+			deleteFilesRecursive temp "insComp.ms"
 			
 			showInstr.checked = false
 			destroyDialog loadInstInfo
@@ -125,7 +135,7 @@ global registeredTo = ""
 			if (state == true) then
 			(
 				uninstallMethod()
-				lblProceed.Text = toUpper "uninstalled successfully !"
+				lblProceed.Text = toUpper "Uninstalled successfully !"
 			)
 			uninstall.checked = false
 		)
@@ -165,109 +175,90 @@ global registeredTo = ""
 		
 		--WINDOW BEAUTY START
 		
+		fn initLicenseFile = 
+		(
+			if(doesDirectoryExist licPath == false) then
+				(
+					makeDir licPath all:false
+				)
+			if(doesFileExist licenseFile == false) then
+				(
+					--create license file
+					cf = createFile licenseFile
+					format "\t" to:cf
+					close cf
+					
+					local domainSection = "DOMAIN"
+					local ownerSection = "BorisoB"
+					local guestSection = "Guest"
+
+					setINISetting licenseFile domainSection keyName "PIXELPOOL\\"
+
+					setINISetting licenseFile ownerSection keyName "Borislav" 
+					setINISetting licenseFile ownerSection keyRole "owner" 
+					setINISetting licenseFile ownerSection keyLic "true"
+					setINISetting licenseFile ownerSection keyReg "UNLIMITED"
+
+					setINISetting licenseFile guestSection keyName "Guest" 
+					setINISetting licenseFile guestSection keyRole "guest" 
+					setINISetting licenseFile guestSection keyLic "false"
+					setINISetting licenseFile guestSection keyReg "UNREGISTERED"
+				)
+		)
+
 		fn checkTheOwner = 
 		(
-			pathToChekerFile = exportFilelog
-			fileInfo = dotNetObject "System.IO.FileInfo" pathToChekerFile
-			fileAccessControl = fileInfo.getAccessControl()
-			NTAccountType = dotNetClass "System.Security.Principal.NTAccount"
-			fileOwner = fileAccessControl.getOwner NTAccountType
-			format "AUTHOR : '%' \n" fileOwner.value
-			ownerPerson = fileOwner.value
+			local pathToChekerFile = exportFilelog
 			
-			 local owner = ""
-			 local license = ""
-			 local unlimit = "UNLIMITED"
-			 local noreg = "UNREGISTERED"
-			 local reg = 2021
-			 local lic = true
-			 local nolic = false
-			
-				if(doesFileExist pathToChekerFile == true) then
+			local guest = "Guest"
+			local noreg = "UNREGISTERED"
+			local nolic = false
+
+			local owner = ""
+			local license = ""
+			local unlimit = "UNLIMITED"
+			local reg = 2021
+			local lic = true
+						
+			local isAccount = false
+
+			initLicenseFile()
+
+			if(doesFileExist pathToChekerFile == true) then
 				(
-					if (ownerPerson == "RIFFRAFF\riffraff") then
+					-- get user name
+					fileInfo = dotNetObject "System.IO.FileInfo" pathToChekerFile
+					fileAccessControl = fileInfo.getAccessControl()
+					NTAccountType = dotNetClass "System.Security.Principal.NTAccount"
+					fileOwner = fileAccessControl.getOwner NTAccountType
+					format "AUTHOR : '%' \n" fileOwner.value
+					ownerPersonFull = fileOwner.value
+					ownerPersonSplit = FilterString ownerPersonFull "\\"
+					ownerPerson = ownerPersonSplit[ownerPersonSplit.count]
+
+					-- check if user exists into the license file
+					if(ownerPersonFull == (getINISetting licenseFile "DOMAIN" keyName) + ownerPerson) then
 					(
-						owner = "Borislav" + " !"
-						isLicensed = lic
-						registeredTo = if isLicensed == nolic then noreg else unlimit
-					)
-					else if(ownerPerson == "PIXELPOOL\BorisoB")then
-					(
-						owner = "Borislav" + " !"
-						isLicensed = lic
-						registeredTo = if isLicensed == nolic then noreg else unlimit
-					)
-					else if(ownerPerson == "PIXELPOOL\Ana.Nedyalkova")then
-					(
-						owner = "Ana" + " !"
-						isLicensed = lic
-						registeredTo = if isLicensed == nolic then noreg else reg
-					)
-					else if(ownerPerson == "PIXELPOOL\KovachA")then
-					(
-						owner = "Alexander" + " !"
-						isLicensed = lic
-						registeredTo = if isLicensed == nolic then noreg else reg
-					)
-					else if(ownerPerson == "PIXELPOOL\DimovD")then
-					(
-						owner = "Didara" + " !"
-						isLicensed = lic
-						registeredTo = if isLicensed == nolic then noreg else reg
-					)
-					else if(ownerPerson == "PIXELPOOL\MincheM")then
-					(
-						owner = "Marina" + " !"
-						isLicensed = lic
-						registeredTo = if isLicensed == nolic then noreg else reg
-					)
-					else if(ownerPerson == "PIXELPOOL\GaidarH")then
-					(
-						owner = "Hristiyana" + " !"
-						isLicensed = lic
-						registeredTo = if isLicensed == nolic then noreg else reg
-					)
-					else if(ownerPerson == "PIXELPOOL\GetzovP")then
-					(
-						owner = "Petya" + " !"
-						isLicensed = lic
-						registeredTo = if isLicensed == nolic then noreg else reg
-					)
-					else if(ownerPerson == "PIXELPOOL\YankovM")then
-					(
-						owner = "Mariya" + " !"
-						isLicensed = lic
-						registeredTo = if isLicensed == nolic then noreg else reg
-					)
-					else if(ownerPerson == "PIXELPOOL\KurtevZ")then
-					(
-						owner = "Zara" + " !"
-						isLicensed = lic
-						registeredTo = if isLicensed == nolic then noreg else reg
-					)
-					else if(ownerPerson == "PIXELPOOL\NenkovE")then
-					(
-						owner = "Mims" + " !"
-						isLicensed = lic
-						registeredTo = if isLicensed == nolic then noreg else reg
-					)
-					else if(ownerPerson == "PIXELPOOL\DancheM")then
-					(
-						owner = "Margarita" + " !"
-						isLicensed = lic
-						registeredTo = if isLicensed == nolic then noreg else reg
-					)
-					else if(ownerPerson == "PIXELPOOL\GoncheM")then
-					(
-						owner = "Mariya" + " !"
-						isLicensed = lic
-						registeredTo = if isLicensed == nolic then noreg else reg
+						local isAccount = hasINISetting licenseFile ownerPerson
+						if(isAccount == true) then
+						(
+							owner = (getINISetting licenseFile ownerPerson keyName) + expresion
+							isLicensed = getINISetting licenseFile ownerPerson keyLic
+							getRegDate = getINISetting licenseFile ownerPerson keyReg
+							registeredTo = if isLicensed == (nolic as string) then noreg else getRegDate
+						)
+						else
+						(
+							owner = (getINISetting licenseFile guest keyName) + expresion
+							isLicensed = getINISetting licenseFile guest keyLic
+							registeredTo = getINISetting licenseFile guest keyReg
+						)
 					)
 					else
 					(
-						owner = "Guest" + " !"
-						isLicensed = lic
-						registeredTo = if isLicensed == nolic then noreg else reg
+						owner = (getINISetting licenseFile guest keyName) + expresion
+						isLicensed = getINISetting licenseFile guest keyLic
+						registeredTo = getINISetting licenseFile guest keyReg
 					)
 				)
 				
@@ -277,16 +268,15 @@ global registeredTo = ""
 		fn additonalSettings = 
 		(
 			--IF THE USER IS  REGISTERED 
-			if(isLicensed == true) then
+			if(isLicensed == "true") then
 			(
 				lblregDate.pos = [(lblLicense.width),(lblLicense.pos[2]-4)]
 				lblregDate.Forecolor = bluecolor
 				lblregDate.Backcolor = bgcolor
 			)
 			
-			
 			--IF THE USER IS NOT REGISTERED -- INSTALATION IS CANCELED AND DISABLED
-			if(isLicensed == false) then
+			if(isLicensed == "false") then
 			(
 				--hide the buttons
 				showInstr.visible = false
@@ -308,7 +298,7 @@ global registeredTo = ""
 		fn checkLicense = 
 		(
 			license = ""
-			if(isLicensed == true) then
+			if(isLicensed == "true") then
 			(
 				license = toUpper "Licensed"
 			)
@@ -323,11 +313,11 @@ global registeredTo = ""
 		fn checkRegistrationDate =
 		(
 			register = ""
-			if(isLicensed == true) then
+			if(isLicensed == "true") then
 			(
 				register = registeredTo
 			)
-			if(isLicensed == false) then
+			if(isLicensed == "false") then
 			(
 				register = registeredTo
 			)
@@ -381,20 +371,20 @@ global registeredTo = ""
 		)
 	)
 	
---	rollout loadInstInfo "INSTALL INFORMATION!" width:300 height:175
---	(
---		label loadInfo "info" text:"" width:280 height:180 pos:[10,10]
---
---		on loadInstInfo open do
---		(
---			insTructions = "INSTssssssssssssRUCTIONS : " + "\n" + "\n" + "Customize   ->  Customize User Interface   ->  Toolbars   ->  Category: BorakaScriptPack_vol1   ->" + "\n" + "\n"
---			insTructions2 =	"New   - >  Set name  ->   Drag some of the scripts in the pop-up window  ->  Set the icon on the toolbar !" 
---			instruction3 = fstructxInstFolder + "\n"
---			loadInfo.text = (insTructions + insTructions2 + instruction3)
---			
---		)
---	)
---	
---	createDialog loadInstInfo pos:[(getDialogpos globalWelcome)[1]+globalWelcome.width + 9,(getDialogPos globalWelcome)[2]+globalWelcome.height - (162-18)] parent:globalWelcome.hwnd style:#()
---	destroyDialog loadInstInfo
+	rollout loadInstInfo "INSTALL INFORMATION!" width:300 height:175
+	(
+		label loadInfo "info" text:"" width:280 height:180 pos:[10,10]
+
+		on loadInstInfo open do
+		(
+			insTructions = "INSTssssssssssssRUCTIONS : " + "\n" + "\n" + "Customize   ->  Customize User Interface   ->  Toolbars   ->  Category: BorakaScriptPack_vol1   ->" + "\n" + "\n"
+			insTructions2 =	"New   - >  Set name  ->   Drag some of the scripts in the pop-up window  ->  Set the icon on the toolbar !" 
+			instruction3 = fstructxInstFolder + "\n"
+			loadInfo.text = (insTructions + insTructions2 + instruction3)
+			
+		)
+	)
+	
+	createDialog loadInstInfo pos:[(getDialogpos globalWelcome)[1]+globalWelcome.width + 9,(getDialogPos globalWelcome)[2]+globalWelcome.height - (162-18)] parent:globalWelcome.hwnd style:#()
+	destroyDialog loadInstInfo
 createDialog globalWelcome pos:[500,400] style:#(#style_sysmenu,#style_toolwindow) 
