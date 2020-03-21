@@ -1,9 +1,9 @@
 global fstructxInstFolder = pathConfig.GetDir #userscripts + "\\BorakaScriptPack_vol1"
 global tempfStructFolder = @"C:\Users\Public\Documents\fStructX\"
 global exportFilelog = @"C:\Users\Public\Documents\fStructX\log.txt" 
-global licPath = @"C:\Users\riffraff\Dropbox\Scripting\maxscript\4_Final stage\Config"
+global licPath = @"C:\Users\riffraff\Dropbox\Scripting\maxscript\4_Final stage\Config\lic\"
 global licName = @"Licenses.ini"
-global licenseFile = licPath + "\\" + licName
+global licenseFile = licPath + licName
 global keyName = "__name__"
 global keyRole = "__role__"
 global keyLic = "__lic__"
@@ -128,6 +128,7 @@ try ( destroyDialog globalWelcome) catch ()
 			
 			if (fstructxInstFolder != "") then DeleteDirAndSubDir fstructxInstFolder
 			colorMan.reiniticons()
+			
 		)
 		
 		on uninstall changed state do
@@ -150,6 +151,7 @@ try ( destroyDialog globalWelcome) catch ()
 
 				on loadInstInfo open do
 				(
+				
 					insTructions = "INSTRUCTIONS : " + "\n" + "\n" + "Customize   ->  Customize User Interface   ->  Toolbars   ->  Category: BorakaScriptPack_vol1   ->" + "\n" + "\n"
 					insTructions2 =	"New   - >  Set name  ->   Drag some of the scripts in the pop-up window  ->  Set the icon on the toolbar !" + "\r"
 					userscriptsPath = "\r#userscripts\r" + (pathConfig.GetDir #userscripts) + "\n"
@@ -357,6 +359,7 @@ try ( destroyDialog globalWelcome) catch ()
 		
 		on globalWelcome moved pos do
 		(
+			LightMeter.active
 			setDialogPos loadInstInfo (pos+[globalWelcome.width + 9 ,globalWelcome.height - (162-18)])
 		)
 		
