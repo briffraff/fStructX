@@ -5,6 +5,7 @@ _site
 .vs
 .vscode
 .idea
+.pyc
 vendor
 bin
 obj
@@ -15,3 +16,4 @@ nodu_modules
 11_Archive
 12_MaxAssets
 3_Art works
+MaxPlus-Python
