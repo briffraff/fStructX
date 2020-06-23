@@ -1,12 +1,14 @@
 global fstructxInstFolder = pathConfig.GetDir #userscripts + "\\BorakaScriptPack_vol1"
 global tempfStructFolder = @"C:\Users\Public\Documents\fStructX\"
-global exportFilelog = @"C:\Users\Public\Documents\fStructX\log.txt" 
-global licPath = @"C:\Users\riffraff\Dropbox\Scripting\maxscript\4_Final stage\Config\lic\"
+global licPath = @"C:\Users\riffraff\Dropbox\Scripting\maxscript\4_Final stage\Config\lic\" --UNIF
+global logName = @"log.txt"
 global licName = @"Licenses.ini"
+global exportFilelog = tempfStructFolder + logName
 global licenseFile = licPath + licName
 global keyName = "__name__"
 global keyRole = "__role__"
 global keyLic = "__lic__"
+global keyId = "__id__"
 global keyReg = "__reg__"
 global expresion = " !"
 
@@ -64,7 +66,7 @@ try ( destroyDialog globalWelcome) catch ()
 		(
 			--------------------------------------------------------#TODO #Implement #install
 			local extractDir = tempfStructFolder
-			local mzpFilename = @"C:\Users\borko\Dropbox\Scripting\maxscript\9_Final script\fStructX_UVPrinter_000Exporter.mzp"
+			local mzpFilename = @"C:\Users\riffraff\Dropbox\Scripting\maxscript\9_Final script\fStructX_UVPrinter_000Exporter.mzp" --UNIF
 			local dropFile = "welcome.ms"
 
 			if msZip.fileInPackage mzpFilename extractDir then 
@@ -88,7 +90,7 @@ try ( destroyDialog globalWelcome) catch ()
 		--UNINSTALL START
 		fn DeleteDirAndSubDir rootDir =
 		(
-			try ( DOSCommand ("rmDir \"" + rootDir + "\" /s /q") ) catch (messagebox "Can't delete fStructX folders!" title:"fStructX uninstall message!!!")
+			try ( DOSCommand ("rmDir \"" + rootDir + "\" /s /q") ) catch (messagebox "Can't delete fStructX folders!" title:"fStructX - Uninstall")
 		)
 		
 		fn deleteFilesRecursive root pattern =
@@ -183,24 +185,36 @@ try ( destroyDialog globalWelcome) catch ()
 				(
 					makeDir licPath all:false
 				)
+
 			if(doesFileExist licenseFile == false) then
 				(
+					setIniForceUTF16Default false
+
 					--create license file
 					cf = createFile licenseFile
-					format "\t" to:cf
+					--format "\t" to:cf
 					close cf
 					
 					local domainSection = "DOMAIN"
 					local ownerSection = "BorisoB"
+					local ownerDefault = "riffraff"
 					local guestSection = "Guest"
 
 					setINISetting licenseFile domainSection keyName "PIXELPOOL\\"
 
+					setINISetting licenseFile ownerSection keyId "2222-2222-2222-2222"
 					setINISetting licenseFile ownerSection keyName "Borislav" 
 					setINISetting licenseFile ownerSection keyRole "owner" 
 					setINISetting licenseFile ownerSection keyLic "true"
 					setINISetting licenseFile ownerSection keyReg "UNLIMITED"
 
+					setINISetting licenseFile ownerDefault keyId "1111-1111-1111-1111"
+					setINISetting licenseFile ownerDefault keyName "Borislav" 
+					setINISetting licenseFile ownerDefault keyRole "owner" 
+					setINISetting licenseFile ownerDefault keyLic "true"
+					setINISetting licenseFile ownerDefault keyReg "UNLIMITED"
+
+					setINISetting licenseFile guestSection keyId "0000-0000-0000-0000"
 					setINISetting licenseFile guestSection keyName "Guest" 
 					setINISetting licenseFile guestSection keyRole "guest" 
 					setINISetting licenseFile guestSection keyLic "false"
@@ -218,9 +232,9 @@ try ( destroyDialog globalWelcome) catch ()
 
 			local owner = ""
 			local license = ""
-			local unlimit = "UNLIMITED"
-			local reg = 2021
-			local lic = true
+			--local unlimit = "UNLIMITED"
+			--local reg = 2021
+			--local lic = true
 						
 			local isAccount = false
 
@@ -359,15 +373,18 @@ try ( destroyDialog globalWelcome) catch ()
 		
 		on globalWelcome moved pos do
 		(
-			LightMeter.active
+			--LightMeter.active
 			setDialogPos loadInstInfo (pos+[globalWelcome.width + 9 ,globalWelcome.height - (162-18)])
 		)
 		
 		on globalWelcome open do
 		(
 			welcome()
-			 
-			if (isLicensed == false and CheckTheOwner() == "Guest !") then
+		)
+
+		on globalWelcome close do 
+		(
+			if ((isLicensed as string) == "false") then
 			(
 				uninstallMethod()
 			)

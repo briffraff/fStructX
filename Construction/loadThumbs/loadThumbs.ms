@@ -126,5 +126,6 @@ rollout loadFrontAndBack "Front/Back views" width:250 height:490
 -- 		display imgAlpha 
 	)
 ) 
+
 bgColDarkGrey = [52,52,52]
 createDialog loadFrontAndBack bgcolor:bgColDarkGrey pos:[(getDialogpos fStruct)[1]+fStruct.width + 373,(getDialogPos fStruct)[2]+fStruct.height + (-393)] parent:fStruct.hwnd style:#()
