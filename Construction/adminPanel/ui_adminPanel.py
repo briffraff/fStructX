@@ -74,18 +74,23 @@ class UI_adminPanel(object):
         self.domainFrame.setFrameShape(QtGui.QFrame.StyledPanel)
         self.domainFrame.setFrameShadow(QtGui.QFrame.Raised)
         self.domainFrame.setObjectName("domainFrame")
+
         self.horizontalLayout_4 = QtGui.QHBoxLayout(self.domainFrame)
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
+
         self.activeDomainLbl = QtGui.QLabel(self.domainFrame)
         self.activeDomainLbl.setObjectName("activeDomainLbl")
         self.horizontalLayout_4.addWidget(self.activeDomainLbl)
+
         self.choseDomainBox = QtGui.QComboBox(self.domainFrame)
         self.choseDomainBox.setMinimumSize(QtCore.QSize(120, 0))
         self.choseDomainBox.setObjectName("choseDomainBox")
         self.choseDomainBox.addItem("")
         self.horizontalLayout_4.addWidget(self.choseDomainBox)
+
         spacerItem2 = QtGui.QSpacerItem(234, 17, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem2)
+        
         self.verticalLayout_2.addWidget(self.domainFrame)
         
 

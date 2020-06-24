@@ -33,6 +33,8 @@ removeBtnText = "Remove"
 licenseOnText = "ON"
 licenseOffText = "OFF"
 updateBtnText = "Update"
+activateAllText = "+"
+removeAllText = "-"
 
 true = "true"
 false = "false"
@@ -70,12 +72,14 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
     tableColDeleteUser = 6
 
 
+
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
         self.update_ui()
         self.connectButtonsToMethods()
         self.show()
+        
 
     # - Update UI
     def update_ui(self):
@@ -99,21 +103,60 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         
         self.tableWidget.horizontalHeader().setMinimumSize(462,20)
         self.tableWidget.horizontalHeader().setMaximumSize(462,20)
+        
+        # resize columns width
+        self.tableWidget.setColumnWidth(0,30)
+        self.tableWidget.setColumnWidth(1,110)
+        self.tableWidget.resizeColumnToContents(2)
+        self.tableWidget.setColumnWidth(3,50)
+        self.tableWidget.setColumnWidth(4,60)
+        self.tableWidget.setColumnWidth(5,64)
+        self.tableWidget.setColumnWidth(6,64)
+        
 
         # - Update Domain Button
         self.updateDomainBtn = QtGui.QPushButton(self.registerDomainNameGroup)
         self.updateDomainBtn.setObjectName("updateDomainBtn")
-        self.horizontalLayout_2.addWidget(self.updateDomainBtn)
         self.updateDomainBtn.setAccessibleName("updateDomainBtn")
-        self.updateDomainBtn.setText(self.setBtnText(self.updateDomainBtn.accessibleName(),"false"))   
+        self.updateDomainBtn.setText(self.setBtnText(self.updateDomainBtn.accessibleName(),true))   
+        self.horizontalLayout_2.addWidget(self.updateDomainBtn)
 
+        # - Activate all licenses button
+        self.activateAllBtn = QtGui.QPushButton(self.domainFrame)
+        self.activateAllBtn.setMinimumWidth(40)
+        self.activateAllBtn.setMaximumSize(QtCore.QSize(40,24))
+        self.activateAllBtn.setObjectName("activateAllBtn")
+        self.activateAllBtn.setAccessibleName("activateAllBtn")
+        self.activateAllBtn.setText(self.setBtnText(self.activateAllBtn.accessibleName(),true))
+        self.activateAllBtn.setToolTip("Activate all users licenses!\n\n***When the current year is over all the licenses will be set to false!")
+        self.horizontalLayout_4.addWidget(self.activateAllBtn)
+
+        #spacer
+        spacerItem3 = QtGui.QSpacerItem(20, 17, QtGui.QSizePolicy.Fixed)
+        self.horizontalLayout_4.addItem(spacerItem3)
+
+        # - Remove all users button
+        self.removeAllBtn = QtGui.QPushButton(self.domainFrame)
+        self.removeAllBtn.setMinimumWidth(40)
+        self.removeAllBtn.setMaximumSize(QtCore.QSize(40,24))
+        self.removeAllBtn.setObjectName("removeAllBtn")
+        self.removeAllBtn.setAccessibleName("removeAllBtn")
+        self.removeAllBtn.setText(self.setBtnText(self.removeAllBtn.accessibleName(),true))
+        self.removeAllBtn.setToolTip("Remove all users !\n")
+        self.horizontalLayout_4.addWidget(self.removeAllBtn)
+
+        #spacer
+        spacerItem3 = QtGui.QSpacerItem(2, 17, QtGui.QSizePolicy.Fixed)
+        self.horizontalLayout_4.addItem(spacerItem3)
+
+
+        # - Styles for buttons
         self.registerDomainBtn.setStyleSheet("#registerDomainBtn:pressed { background-color: #0078d7; color:white }")
         self.registerUserBtn.setStyleSheet("#registerUserBtn:pressed { background-color: #0078d7; color:white; }")
 
         # - Active user info
         self.welcomeName.setStyleSheet("background-color:#258bdd")
         self.activeUserRole.setStyleSheet("background-color:#258bdd")
-
 
     def resetStyles(self):
         self.registerDomainNameField.setStyleSheet("color:white")
@@ -170,12 +213,20 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
                 self.onOffBtn.setStyleSheet("#licenseBtn {background-color: #6dae2e;} #licenseBtn:pressed {background-color: #444444; color: white;}")
             else:
                 self.text = licenseOffText
-                self.onOffBtn.setStyleSheet("background-color: #fe0000;")
+                self.onOffBtn.setStyleSheet("#licenseBtn {background-color: #fe0000;} #licenseBtn:pressed {background-color: #444444; color: white;}")
 
         if(buttonName == "updateDomainBtn"):
             self.text = updateBtnText
             self.updateDomainBtn.setStyleSheet("#updateDomainBtn:pressed { background-color: #0078d7; color:white }")  
+
+        if(buttonName == "activateAllBtn"):
+            self.text = activateAllText
+            self.activateAllBtn.setStyleSheet("#activateAllBtn {font-size: 16px; background-color: #6dae2e; color:white;} #activateAllBtn:pressed {background-color: #444; color:white;}")
             
+        if(buttonName == "removeAllBtn"):
+            self.text = removeAllText
+            self.removeAllBtn.setStyleSheet("#removeAllBtn {font-size: 20px; background-color: #fe0000; color:white;} #removeAllBtn:pressed {background-color: #444; color:white;}")
+
         return self.text
 
     
@@ -407,6 +458,14 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         else:
             return
 
+    # - Activate all users account
+    def activateAllLicenses(self):
+        print "All User's licenses - Activated !"
+
+    # - Remove all users account
+    def removeAllUsers(self):
+        print "All Users removed !"
+    
     # get clicked widget and select row
     def focusOnClickedWidget(self):
 
@@ -460,7 +519,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         
         #sort filtered list
         self.sortedList = sorted(self.usersList)
-        
+
         return self.sortedList 
 
     #users count
@@ -644,8 +703,9 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
     # - Populate table with users info
     def populateTable(self):
 
+
         #get users
-        self.users = self.getUsers()
+        self.users = list(self.getUsers())
 
         #count the users
         self.usersCount = self.count(self.users)
@@ -700,6 +760,10 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
                 
             # self.currentStatus = "true" #debug
 
+        # order table by column name
+        # self.tableWidget.sortItems(1,QtCore.Qt.SortOrder.AscendingOrder)
+        # self.tableWidget.horizontalHeader().setSortIndicator(1,QtCore.Qt.AscendingOrder)
+
     def core(self):
         self.populateActiveUserInfo()
         self.populateDomain()
@@ -711,6 +775,8 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.registerDomainNameGroup.clicked.connect(self.checkboxDomainGroup)
         self.registerUserBtn.clicked.connect(self.registerUser)
         self.registerNewUserGroup.clicked.connect(self.checkboxUserGroup)
+        self.activateAllBtn.clicked.connect(self.activateAllLicenses)
+        self.removeAllBtn.clicked.connect(self.removeAllUsers)
 
 def main():
     app = QtGui.QApplication.instance()
@@ -719,6 +785,7 @@ def main():
 
     mainWin = MainWindow()
     mainWin.core()
+  
 
     with open((qssFile), 'r') as ss:
             app.setStyleSheet(ss.read())
