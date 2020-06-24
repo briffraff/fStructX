@@ -8,7 +8,7 @@ from ui_adminPanel import UI_adminPanel
 import resource_rc
 from backports import configparser
 import uuid
-from collections import OrderedDict
+# from collections import OrderedDict
 import datetime
 
 
@@ -78,6 +78,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
         self.update_ui()
+        self.setIcon()
         self.connectButtonsToMethods()
         self.show()
         
@@ -158,6 +159,13 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         # - Active user info
         self.welcomeName.setStyleSheet("background-color:#258bdd")
         self.activeUserRole.setStyleSheet("background-color:#258bdd")
+
+
+    # - Set Icon
+    def setIcon(self):
+        self.icon = QtGui.QIcon(":/resource_rc/images/icon.png")
+        self.setWindowIcon(self.icon)
+
 
     def resetStyles(self):
         self.registerDomainNameField.setStyleSheet("color:white")
@@ -508,7 +516,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
                         self.licenseFileInfo.set(section,keyLic,false)
 
                 self.activateAllBtn.setText("-")
-                self.activateAllBtn.setStyleSheet("#activateAllBtn {font-size: 16px; background-color:  #fe0000; color:white;} #activateAllBtn:pressed {background-color: #444; color:white;}")
+                self.activateAllBtn.setStyleSheet("#activateAllBtn {font-size: 20px; background-color:  #fe0000; color:white;} #activateAllBtn:pressed {background-color: #444; color:white;}")
 
             elif(self.clickedBtnText == "-"):
                 #change license status

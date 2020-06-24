@@ -6,7 +6,7 @@ _utf8 = QtGui.QApplication.UnicodeUTF8
 class UI_adminPanel(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.setStyleSheet("background-image: url(:/images/images/AdminPanel_ui);")
+        MainWindow.setStyleSheet("background-image: url(:/resource_rc/images/AdminPanel_ui);")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)
         MainWindow.resize(480, 650)
         MainWindow.setMinimumSize(QtCore.QSize(480, 360))
@@ -117,6 +117,7 @@ class UI_adminPanel(object):
         self.tableWidget.setGridStyle(QtCore.Qt.DashLine)
         self.tableWidget.setWordWrap(False)
         self.tableWidget.setColumnCount(0)
+        self.tableWidget.setSortingEnabled(False)
         self.tableWidget.setRowCount(0)
         self.tableWidget.setObjectName("tableWidget")
 
@@ -202,10 +203,7 @@ class UI_adminPanel(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Admin Panel", None, _utf8))
         self.activeDomainLbl.setText(_translate("MainWindow", " => DOMAIN : ", None, _utf8))
 
-        self.tableWidget.setSortingEnabled(True)
-        __sortingEnabled = self.tableWidget.isSortingEnabled()
         self.tableWidget.setSortingEnabled(False)
-        self.tableWidget.setSortingEnabled(__sortingEnabled)
         
         self.registerDomainNameGroup.setTitle(_translate("MainWindow", "Register/Update Domain", None, _utf8))
         self.registerDomainNameField.setPlaceholderText(_translate("MainWindow", "domain name", None, _utf8))

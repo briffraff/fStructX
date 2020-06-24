@@ -47,11 +47,11 @@ QToolTip
 } */
 
 /* QWidget#centralWidget {
-	background-image: url(:/images/images/AdminPanel_ui.png);
+	background-image: url(:/resource_rc/images/AdminPanel_ui.png);
 } */
 
 /* QMainWindow#centralWidget {
-    background-image: url(:/images/images/AdminPanel_ui.png);
+    background-image: url(:/resource_rc/images/AdminPanel_ui.png);
 } */
 
 /* main widget */
@@ -216,7 +216,7 @@ QComboBox::drop-down
 
 QComboBox::down-arrow
 {
-     image: url(:/images/images/down_arrow.png);
+     image: url(:/resource_rc/images/down_arrow.png);
 }
 
 /* groupbox */
@@ -565,7 +565,7 @@ QRadioButton::indicator:checked
 
 #registerDomainNameGroup::indicator:checked, #registerNewUserGroup::indicator:checked {
     border: 1px solid #258bdd;
-    image:url(:/images/images/checkbox.png);
+    image:url(:/resource_rc/images/checkbox.png);
 }
 
 #registerDomainNameGroup::indicator:unchecked, #registerNewUserGroup::indicator:unchecked {
@@ -594,7 +594,7 @@ QRadioButton::indicator:hover, QCheckBox::indicator:hover
 
 /* QCheckBox::indicator:checked
 {
-    image:url(:/images/images/checkbox.png);
+    image:url(:/resource_rc/images/checkbox.png);
 } */
 
 /* disabled checkbox
