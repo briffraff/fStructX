@@ -109,11 +109,12 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         # resize columns width
         self.tableWidget.setColumnWidth(0,30)
         self.tableWidget.setColumnWidth(1,110)
-        self.tableWidget.resizeColumnToContents(2)
-        self.tableWidget.setColumnWidth(3,50)
-        self.tableWidget.setColumnWidth(4,60)
+        # self.tableWidget.resizeColumnToContents(2) #its not working if sorting is False ?
+        self.tableWidget.setColumnWidth(2,75)
+        self.tableWidget.setColumnWidth(3,45)
+        self.tableWidget.setColumnWidth(4,70)
         self.tableWidget.setColumnWidth(5,64)
-        self.tableWidget.setColumnWidth(6,64)
+        self.tableWidget.setColumnWidth(6,60)
         
 
         # - Update Domain Button
