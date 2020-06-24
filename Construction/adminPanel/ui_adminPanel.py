@@ -8,7 +8,7 @@ class UI_adminPanel(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setStyleSheet("background-image: url(:/images/images/AdminPanel_ui);")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)
-        MainWindow.resize(480, 360)
+        MainWindow.resize(480, 650)
         MainWindow.setMinimumSize(QtCore.QSize(480, 360))
         MainWindow.setMaximumSize(QtCore.QSize(480, 800))
         MainWindow.setAutoFillBackground(True)

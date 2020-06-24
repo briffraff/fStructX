@@ -60,6 +60,8 @@ pauseFor = 2500
 
 deleteUserMsg = 'Are you sure you want to delete this user ? \n\t         [  {0}  ]'
 licenseOnOffMsg = 'Are you sure you want to turn [ {0} ]  [ {1} ]  license ?'
+removeAllUsersMsg = 'Are you sure you want to remove ALL users ?'
+licenseOnOffAllUsersMsg = 'Are you sure you want to set all license [ {0} ] ?'
 
 class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
@@ -70,7 +72,6 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
     tableColRegisterTo = 4
     tableColLicense = 5
     tableColDeleteUser = 6
-
 
 
     def __init__(self, parent=None):
@@ -128,7 +129,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.activateAllBtn.setObjectName("activateAllBtn")
         self.activateAllBtn.setAccessibleName("activateAllBtn")
         self.activateAllBtn.setText(self.setBtnText(self.activateAllBtn.accessibleName(),true))
-        self.activateAllBtn.setToolTip("Activate all users licenses!\n\n***When the current year is over all the licenses will be set to false!")
+        self.activateAllBtn.setToolTip("Activate all users licenses!\n\n***When the current year is over all the licenses will be set to OFF!")
         self.horizontalLayout_4.addWidget(self.activateAllBtn)
 
         #spacer
@@ -337,8 +338,9 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
             self.registerAccountNameField.clear()
             self.registerRoleField.clear()
         
+        self.populateActiveUserInfo()
         self.populateTable()
-            
+        
 
     # - Generate UUID according name,account,role,current time
     def generateUUID(self,account,name,role):
@@ -362,6 +364,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
         return regToDate
 
+
     # - messagebox(msg)
     def message(self,msg):
 
@@ -370,15 +373,25 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         # format the message accorrding passed msg
         if(msg.__contains__("delete")):
             self.theMsg = deleteUserMsg.format(self.currentAccount)
+
         elif(msg.__contains__("license")):
-
             self.clickedBtnText = self.focusOnClickedWidget().text()
-
             #get text of the button then passed opposite to the message
             if(self.clickedBtnText == licenseOffText):
                 self.theMsg = licenseOnOffMsg.format(licenseOnText,self.currentAccount)
             elif(self.clickedBtnText == licenseOnText ):
                 self.theMsg = licenseOnOffMsg.format(licenseOffText,self.currentAccount)
+
+        elif(msg.__contains__("ALL")):
+            self.theMsg = removeAllUsersMsg
+        
+        elif(msg.__contains__("onOffAllLicense")):
+            self.clickedBtnText = self.focusOnClickedWidget().text()
+            #get text of the button then passed opposite to the message
+            if(self.clickedBtnText == "-"):
+                self.theMsg = licenseOnOffAllUsersMsg.format(licenseOnText)
+            elif(self.clickedBtnText == "+"):
+                self.theMsg = licenseOnOffAllUsersMsg.format(licenseOffText)
         
         # message to confirm delete process
         self.yesNoBox = QtGui.QMessageBox(
@@ -424,6 +437,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         else:
             return
 
+
     # - Activate or Deactivate user license
     def activateDeactivateLicense(self):
         #read ini files
@@ -458,14 +472,102 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         else:
             return
 
+
     # - Activate all users account
-    def activateAllLicenses(self):
-        print "All User's licenses - Activated !"
+    def activateAllLic(self):
+        #read ini files
+        self.licenseFileInfo = self.readConfigFile(licenseFile)
+
+        #get all sections and filter them
+        self.users = self.licenseFileInfo.sections()
+        self.filteredSections = filter(
+            lambda _section:
+             _section != "DOMAIN" and 
+             _section != "riffraff" and 
+             _section != "BorisoB" and
+             _section != "DimovD" and
+             _section != "Guest",
+             self.users
+             )
+        
+        self.confirmDelete = self.message("onOffAllLicense")
+
+        if (self.confirmDelete == QtGui.QMessageBox.Yes):
+
+            self.clickedBtnText = self.focusOnClickedWidget().text()
+
+            if(self.clickedBtnText == "+"):
+                #change license status
+                for section in self.filteredSections:
+
+                    #check if current section exist in the config file
+                    self.isLicenseExist = self.licenseFileInfo.has_section(section)
+
+                    # set to OFF
+                    if (self.isLicenseExist):   
+                        self.licenseFileInfo.set(section,keyLic,false)
+
+                self.activateAllBtn.setText("-")
+                self.activateAllBtn.setStyleSheet("#activateAllBtn {font-size: 16px; background-color:  #fe0000; color:white;} #activateAllBtn:pressed {background-color: #444; color:white;}")
+
+            elif(self.clickedBtnText == "-"):
+                #change license status
+                for section in self.filteredSections:
+
+                    #check if current section exist in the config file
+                    self.isLicenseExist = self.licenseFileInfo.has_section(section)
+
+                    # set to ON
+                    if (self.isLicenseExist):   
+                        self.licenseFileInfo.set(section,keyLic,true)
+                    
+                self.activateAllBtn.setText("+")
+                self.activateAllBtn.setStyleSheet("#activateAllBtn {font-size: 16px; background-color: #6dae2e; color:white;} #activateAllBtn:pressed {background-color: #444; color:white;}")
+
+
+            with open(licenseFile,'w') as output_file:
+                self.licenseFileInfo.write(output_file)
+
+            #populate table
+            self.populateTable()
+        else:
+            return
+
 
     # - Remove all users account
     def removeAllUsers(self):
-        print "All Users removed !"
+        #read ini files
+        self.licenseFileInfo = self.readConfigFile(licenseFile)
+
+        #get all sections and filter them
+        self.users = self.licenseFileInfo.sections()
+        self.filteredSections = filter(
+            lambda _section:
+             _section != "DOMAIN" and 
+             _section != "riffraff" and 
+             _section != "BorisoB" and
+             _section != "DimovD" and
+             _section != "Guest",
+             self.users
+             )
+        
+        self.confirmDelete = self.message(removeAllUsersMsg)
+
+        if (self.confirmDelete == QtGui.QMessageBox.Yes):
+            
+            # remove sections
+            for section in self.filteredSections:
+                self.licenseFileInfo.remove_section(section)
+
+            with open(licenseFile,'w') as output_file:
+                self.licenseFileInfo.write(output_file)
+
+            #populate table
+            self.populateTable()
+        else:
+            return
     
+
     # get clicked widget and select row
     def focusOnClickedWidget(self):
 
@@ -521,6 +623,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.sortedList = sorted(self.usersList)
 
         return self.sortedList 
+
 
     #users count
     def count(self,users):
@@ -775,7 +878,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.registerDomainNameGroup.clicked.connect(self.checkboxDomainGroup)
         self.registerUserBtn.clicked.connect(self.registerUser)
         self.registerNewUserGroup.clicked.connect(self.checkboxUserGroup)
-        self.activateAllBtn.clicked.connect(self.activateAllLicenses)
+        self.activateAllBtn.clicked.connect(self.activateAllLic)
         self.removeAllBtn.clicked.connect(self.removeAllUsers)
 
 def main():
@@ -786,9 +889,8 @@ def main():
     mainWin = MainWindow()
     mainWin.core()
   
-
     with open((qssFile), 'r') as ss:
-            app.setStyleSheet(ss.read())
+        app.setStyleSheet(ss.read())
 
     app.exec_()
 
