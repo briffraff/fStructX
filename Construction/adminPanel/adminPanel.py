@@ -172,6 +172,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.registerDomainNameField.setStyleSheet("color:white")
 
 
+
     # - Style methods for checkbox 
     def checkboxDomainGroup(self):
 
