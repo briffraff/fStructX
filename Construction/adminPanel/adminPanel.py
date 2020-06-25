@@ -105,7 +105,8 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         
         self.tableWidget.horizontalHeader().setMinimumSize(462,20)
         self.tableWidget.horizontalHeader().setMaximumSize(462,20)
-        
+        self.tableWidget.setFixedWidth(462)
+
         # resize columns width
         self.tableWidget.setColumnWidth(0,30)
         self.tableWidget.setColumnWidth(1,110)
@@ -116,6 +117,8 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.tableWidget.setColumnWidth(5,64)
         self.tableWidget.setColumnWidth(6,60)
         
+        # lock header columns resize
+        self.tableWidget.horizontalHeader().setResizeMode(QtGui.QHeaderView.Fixed)
 
         # - Update Domain Button
         self.updateDomainBtn = QtGui.QPushButton(self.registerDomainNameGroup)
@@ -170,7 +173,6 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
     def resetStyles(self):
         self.registerDomainNameField.setStyleSheet("color:white")
-
 
 
     # - Style methods for checkbox 
@@ -290,6 +292,9 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         # __lic__ = true
         # __reg__ = UNLIMITED
 
+        # deselect all rows
+        self.tableWidget.clearSelection()
+
         #read ini file
         self.licenseFileInfo = self.readConfigFile(licenseFile)
         
@@ -339,9 +344,9 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
             with open(licenseFile,"w") as lic:
                 self.licenseFileInfo.write(lic)
 
-            self.registerUserBtn.setStyleSheet("#registerUserBtn {background-color: #6dae2e;}")
-            QtCore.QTimer.singleShot(1500, lambda :self.registerUserBtn.setStyleSheet(
-                "#registerUserBtn {background-color: #343434;} #registerUserBtn:pressed { background-color: #0078d7; color:white; }"))
+            # self.registerUserBtn.setStyleSheet("#registerUserBtn {background-color: #6dae2e;}")
+            # QtCore.QTimer.singleShot(1500, lambda :self.registerUserBtn.setStyleSheet(
+            #     "#registerUserBtn {background-color: #343434;} #registerUserBtn:pressed { background-color: #0078d7; color:white; }"))
 
             #clear fields 
             self.registerNameField.clear()
@@ -350,6 +355,27 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         
         self.populateActiveUserInfo()
         self.populateTable()
+
+        # - select row of the registered user
+        for row in range(self.tableWidget.rowCount()):
+            if(self.tableWidget.item(row,self.tableColAccountName).text() == self.currentUserAccount):
+
+                #select row
+                self.tableWidget.selectRow(row)
+
+                # imitate flash light
+                QtCore.QTimer.singleShot(10, lambda :self.tableWidget.setStyleSheet("QWidget:item:selected { background-color: white; color:white; }"))
+                QtCore.QTimer.singleShot(250, lambda :self.tableWidget.setStyleSheet("QWidget:item:selected { background-color: #0078d7; color:white; }"))
+                QtCore.QTimer.singleShot(325, lambda :self.tableWidget.setStyleSheet("QWidget:item:selected { background-color: white; color:white; }"))
+                QtCore.QTimer.singleShot(375, lambda :self.tableWidget.setStyleSheet("QWidget:item:selected { background-color: #d7801a; color:white; }"))
+
+                break
+
+
+
+
+
+
         
 
     # - Generate UUID according name,account,role,current time
@@ -485,6 +511,10 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
     # - Activate all users account
     def activateAllLic(self):
+
+        # deselect all rows
+        self.tableWidget.clearSelection()
+
         #read ini files
         self.licenseFileInfo = self.readConfigFile(licenseFile)
 
@@ -546,6 +576,9 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
     # - Remove all users account
     def removeAllUsers(self):
+        # deselect all rows
+        self.tableWidget.clearSelection()
+
         #read ini files
         self.licenseFileInfo = self.readConfigFile(licenseFile)
 
@@ -583,15 +616,17 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
         # get focus on table buttons
         self.buttonLocation = QtGui.qApp.focusWidget()
-        self.btnDeleteIndex = self.tableWidget.indexAt(self.buttonLocation.pos())
-        print "col={} ,row={}".format(self.btnDeleteIndex.column(), self.btnDeleteIndex.row())
 
-        # get row index
-        self.currentUserNumber = self.btnDeleteIndex.row()
+        if(self.buttonLocation.accessibleName() != "activateAllBtn"):
+            self.btnDeleteIndex = self.tableWidget.indexAt(self.buttonLocation.pos())
+            print "col={} ,row={}".format(self.btnDeleteIndex.column(), self.btnDeleteIndex.row())
 
-        #select row
-        self.tableWidget.selectRow(self.currentUserNumber)
-        print "{0}".format(self.currentUserNumber)
+            # get row index
+            self.currentUserNumber = self.btnDeleteIndex.row()
+
+            #select row
+            self.tableWidget.selectRow(self.currentUserNumber)
+            print "{0}".format(self.currentUserNumber)
 
         return self.buttonLocation
 
@@ -813,9 +848,11 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.populateDomain()
 
 
+
     # - Populate table with users info
     def populateTable(self):
 
+        # self.tableWidget.setSortingEnabled(False)
 
         #get users
         self.users = list(self.getUsers())
@@ -874,6 +911,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
             # self.currentStatus = "true" #debug
 
         # order table by column name
+        # self.tableWidget.setSortingEnabled(True)
         # self.tableWidget.sortItems(1,QtCore.Qt.SortOrder.AscendingOrder)
         # self.tableWidget.horizontalHeader().setSortIndicator(1,QtCore.Qt.AscendingOrder)
 
@@ -898,6 +936,7 @@ def main():
 
     mainWin = MainWindow()
     mainWin.core()
+
   
     with open((qssFile), 'r') as ss:
         app.setStyleSheet(ss.read())

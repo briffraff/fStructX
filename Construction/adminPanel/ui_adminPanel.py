@@ -201,8 +201,6 @@ class UI_adminPanel(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "Admin Panel", None, _utf8))
         self.activeDomainLbl.setText(_translate("MainWindow", " => DOMAIN : ", None, _utf8))
-
-        # self.tableWidget.setSortingEnabled(True)
         
         self.registerDomainNameGroup.setTitle(_translate("MainWindow", "Register/Update Domain", None, _utf8))
         self.registerDomainNameField.setPlaceholderText(_translate("MainWindow", "domain name", None, _utf8))
