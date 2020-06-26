@@ -16,7 +16,6 @@ import datetime
 
 
 
-
 class iNI(dict):
     def __init__(self):
         super(iNI, self).__init__()
@@ -47,7 +46,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
     def update_ui(self):
 
         # - Users info table
-        self.tableWidget.setColumnCount(7)
+        self.tableWidget.setColumnCount(len(gc.columns))
 
         self.tableHItem = self.tableWidget.horizontalHeaderItem
 
@@ -365,7 +364,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
             self.theMsg = gc.deleteUserMsg.format(self.currentAccount)
 
         elif(msg.__contains__("license")):
-            self.clickedBtnText = self.focusOnClickedWidget().text()
+            self.clickedBtnText = QtGui.qApp.focusWidget().text()
             #get text of the button then passed opposite to the message
             if(self.clickedBtnText == gc.licenseOffText):
                 self.theMsg = gc.licenseOnOffMsg.format(gc.licenseOnText,self.currentAccount)
@@ -376,7 +375,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
             self.theMsg = gc.removeAllUsersMsg
         
         elif(msg.__contains__("onOffAllLicense")):
-            self.clickedBtnText = self.focusOnClickedWidget().text()
+            self.clickedBtnText = QtGui.qApp.focusWidget().text()
             #get text of the button then passed opposite to the message
             if(self.clickedBtnText == "-"):
                 self.theMsg = gc.removeAllUsersMsg.format(gc.licenseOnText)
@@ -403,11 +402,15 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         #read ini files
         self.licenseFileInfo = self.readConfigFile(gc.licenseFile)
 
-        # get focus on table buttons
-        self.btnDeleteIndex = self.tableWidget.indexAt(self.focusOnClickedWidget().pos())
+        # get clicked widget
+        self.focusedWidget = self.focusOnClickedWidget()
+        # get row index
+        self.currentUserRow = self.focusedWidget[2]
+        #select row
+        self.tableWidget.selectRow(self.currentUserRow)
 
         # get account name
-        self.currentAccount = self.tableWidget.item(self.btnDeleteIndex.row(), 2).text()
+        self.currentAccount = self.tableWidget.item(self.currentUserRow, 2).text()
 
         # message method to confirm delete process
         self.confirmDelete = self.message(gc.deleteUserMsg)
@@ -421,7 +424,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
                 self.licenseFileInfo.write(output_file)
 
             # Delete row
-            self.tableWidget.removeRow(self.btnDeleteIndex.row())
+            self.tableWidget.removeRow(self.currentUserRow)
 
             self.populateTable()
         else:
@@ -433,11 +436,15 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         #read ini files
         self.licenseFileInfo = self.readConfigFile(gc.licenseFile)
 
-        # get focus on table buttons
-        self.btnDeleteIndex = self.tableWidget.indexAt(self.focusOnClickedWidget().pos())
+        # get clicked widget
+        self.focusedWidget = self.focusOnClickedWidget()
+        # get row index
+        self.currentUserRow = self.focusedWidget[2]
+        #select row
+        self.tableWidget.selectRow(self.currentUserRow)
 
         # get account name
-        self.currentAccount = self.tableWidget.item(self.btnDeleteIndex.row(), 2).text()
+        self.currentAccount = self.tableWidget.item(self.currentUserRow, 2).text()
 
         #message method to confirm delete process
         self.confirmDelete = self.message(gc.licenseOnOffMsg)
@@ -459,6 +466,9 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
             #populate table
             self.populateTable()
+
+            #select row
+            self.tableWidget.selectRow(self.currentUserRow)
         else:
             return
 
@@ -488,7 +498,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
         if (self.confirmDelete == QtGui.QMessageBox.Yes):
 
-            self.clickedBtnText = self.focusOnClickedWidget().text()
+            self.clickedBtnText = QtGui.qApp.focusWidget().text()
 
             if(self.clickedBtnText == "+"):
                 #change license status
@@ -575,14 +585,9 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
             self.btnDeleteIndex = self.tableWidget.indexAt(self.buttonLocation.pos())
             print "col={} ,row={}".format(self.btnDeleteIndex.column(), self.btnDeleteIndex.row())
 
-            # get row index
-            self.currentUserNumber = self.btnDeleteIndex.row()
+            self.currentUserRow = self.btnDeleteIndex.row()
 
-            #select row
-            self.tableWidget.selectRow(self.currentUserNumber)
-            print "{0}".format(self.currentUserNumber)
-
-        return self.buttonLocation
+        return [self.buttonLocation,self.btnDeleteIndex,self.currentUserRow]
 
 
     # get single user info
@@ -805,19 +810,17 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
     # - Populate table with users info
     def populateTable(self):
 
-        # self.tableWidget.setSortingEnabled(False)
-
         #get users
         self.users = list(self.getUsers())
 
         #count the users
         self.usersCount = self.count(self.users)
         
-        #set table row count
+        #set table rows count
         self.tableWidget.setRowCount(self.usersCount)
         
-        #set table column count
-        self.userPropertiesCount = self.tableWidget.columnCount() # properties count
+        #set table columns count
+        self.userPropertiesCount = self.tableWidget.columnCount() # options count
 
         # set item
         for row, accountName in enumerate(self.users):
@@ -851,22 +854,25 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
                 # add license button : column 5 and user or admin
                 if (self.tableColLicense == col and user or self.tableColLicense == col and admin):
                     self.addLicenseOnOffBtn(row,col,self.currentStatus)
+                    
                 # add delete button : column 6 and user or admin
                 elif (self.tableColDeleteUser == col and user or self.tableColDeleteUser == col and admin):
                     self.addDeleteBtn(row,col,self.currentStatus)
+
                 #all other options
                 else:
                     if(col == self.tableColLicense and owner or col == self.tableColDeleteUser and owner):
                         self.tableWidget.takeItem(row,col)
+                        self.tableWidget.setItem(row,col,item)
+                        self.tableWidget.removeCellWidget(row,col)
                     else:
                         self.tableWidget.item(row,col).setText(self.userInfo[col])
                 
             # self.currentStatus = "true" #debug
 
         # order table by column name
-        # self.tableWidget.setSortingEnabled(True)
-        # self.tableWidget.sortItems(1,QtCore.Qt.SortOrder.AscendingOrder)
-        # self.tableWidget.horizontalHeader().setSortIndicator(1,QtCore.Qt.AscendingOrder)
+        self.tableWidget.setSortingEnabled(False)
+        self.tableWidget.sortItems(self.tableColName,QtCore.Qt.SortOrder.AscendingOrder)
 
     def core(self):
         self.populateActiveUserInfo()

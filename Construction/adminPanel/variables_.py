@@ -32,6 +32,9 @@ roles = {
     "u":"user",
 }
 
+# Header columns
+columns = ["Id","Name","Account","Role","Register to","License","Delete user"]
+
 # Sections
 domainSection = 'DOMAIN'
 domainName = ''
