@@ -20,6 +20,7 @@ licenseOffText = "OFF"
 updateBtnText = "Update"
 activateAllText = "+"
 removeAllText = "-"
+usersCountText = '=> USERS :'
 
 # License true/false
 true = "true"
@@ -58,3 +59,4 @@ deleteUserMsg = 'Are you sure you want to delete this user ? \n\t         [  {0}
 licenseOnOffMsg = 'Are you sure you want to turn [ {0} ]  [ {1} ]  license ?'
 removeAllUsersMsg = 'Are you sure you want to remove ALL users ?'
 licenseOnOffAllUsersMsg = 'Are you sure you want to set all license [ {0} ] ?'
+usersCountMsg = '{0}'

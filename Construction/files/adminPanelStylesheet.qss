@@ -35,6 +35,15 @@ QToolTip
     border-radius: 2;
 }
 
+#usersCountField {
+    font-size:12px; 
+    /* font-weight: bold; */
+    color:#c4c4c4;
+    border-style: solid;
+    border: 1px solid #258bdd;
+    border-radius: 2;
+}
+
 #yesNoBox {
     background-color: #333;
     font-size: 12px;

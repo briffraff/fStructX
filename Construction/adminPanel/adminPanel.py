@@ -86,6 +86,21 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.updateDomainBtn.setText(self.setBtnText(self.updateDomainBtn.accessibleName(),gc.true))   
         self.horizontalLayout_2.addWidget(self.updateDomainBtn)
 
+        # - Users count label
+        self.usersCountLabel = QtGui.QLabel(self.domainFrame)
+        self.horizontalLayout_4.addWidget(self.usersCountLabel)
+
+        # - Users count 
+        self.usersCountField = QtGui.QLabel(self.domainFrame)
+        self.usersCountField.setMaximumSize(QtCore.QSize(40,20))
+        self.usersCountField.setObjectName("usersCountField")
+        self.usersCountField.setAccessibleName("usersCountField")
+        self.horizontalLayout_4.addWidget(self.usersCountField)
+
+        #spacer
+        spacerItem3 = QtGui.QSpacerItem(240, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem3)
+
         # - Activate all licenses button
         self.activateAllBtn = QtGui.QPushButton(self.domainFrame)
         self.activateAllBtn.setMinimumWidth(40)
@@ -122,6 +137,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         # - Active user info
         self.welcomeName.setStyleSheet("background-color:#258bdd")
         self.activeUserRole.setStyleSheet("background-color:#258bdd")
+        # self.usersCountField.setStyleSheet("background-color:#258bdd")
 
 
     # - Set Icon
@@ -629,7 +645,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         return self.sortedList 
 
 
-    #users count
+    # count
     def count(self,users):
 
         #count the users
@@ -637,6 +653,17 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
         return self.usersCount
 
+
+    # set users count to widget
+    def populateUsersCountInfo(self):
+
+        self.users = self.getUsers()
+
+        self.usersCount = self.count(self.users)
+
+        self.usersCountField.setText(gc.usersCountMsg.format(self.usersCount))
+        self.usersCountLabel.setText(gc.usersCountText)
+        
 
     # get row and col for selection
     def getRowAndCol(self):
@@ -672,8 +699,8 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         #if user is registered
         if(self.isUserExist):
 
-            self.isAdmin = self.licenseFileInfo.get(self.activeUser, gc.keyRole) == "admin"
-            self.isOwner = self.licenseFileInfo.get(self.activeUser, gc.keyRole) == "owner"
+            self.isAdmin = self.licenseFileInfo.get(self.activeUser, gc.keyRole) == gc.roles['a']
+            self.isOwner = self.licenseFileInfo.get(self.activeUser, gc.keyRole) == gc.roles['o']
 
             #if admin or owner
             if (self.isAdmin or self.isOwner):
@@ -874,10 +901,14 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.tableWidget.setSortingEnabled(False)
         self.tableWidget.sortItems(self.tableColName,QtCore.Qt.SortOrder.AscendingOrder)
 
+        # update user count
+        self.populateUsersCountInfo()
+
     def core(self):
         self.populateActiveUserInfo()
         self.populateDomain()
         self.populateTable()
+
 
     def connectButtonsToMethods(self):
         self.updateDomainBtn.clicked.connect(self.updateDomainName)
