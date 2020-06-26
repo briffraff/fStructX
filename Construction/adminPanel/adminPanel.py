@@ -1,6 +1,9 @@
+import variables_ as gc
+
 import sys
 
-sys.path.append(r"C:\Users\riffraff\Dropbox\Scripting\maxscript\4_Final stage\Config\modules")
+# append sys paths
+sys.path.append(gc.modulesPath)
 
 import os
 from PySide import QtGui,QtCore 
@@ -12,56 +15,13 @@ import uuid
 import datetime
 
 
+
+
 class iNI(dict):
     def __init__(self):
         super(iNI, self).__init__()
         self.__dict__ = self
 
-
-qssFilePath = r"C:\Users\riffraff\Dropbox\Scripting\maxscript\Construction\files"
-licPath = r"C:\Users\riffraff\Dropbox\Scripting\maxscript\4_Final stage\Config\lic"
-tempfStructFolder = r"C:\Users\Public\Documents\fStructX"
-qssFileName = "adminPanelStylesheet.qss"
-logName = r"log.txt"
-licName = r"Licenses.ini"
-
-logFile = os.path.join(tempfStructFolder, logName)
-licenseFile = os.path.join(licPath, licName)
-qssFile = os.path.join(qssFilePath, qssFileName)
-
-removeBtnText = "Remove"
-licenseOnText = "ON"
-licenseOffText = "OFF"
-updateBtnText = "Update"
-activateAllText = "+"
-removeAllText = "-"
-
-true = "true"
-false = "false"
-
-roles = {
-    "o":"owner",
-    "a":"admin",
-    "u":"user",
-}
-
-domainSection = 'DOMAIN'
-domainName = ''
-ownerSection = 'OWNER'
-ownerName = 'riffraff'
-keyName = "__name__"
-keyRole = "__role__"
-keyLic = "__lic__"
-keyReg = "__reg__"
-keyAccount = "__account__"
-keyId = "__id__"
-pauseFor = 2500
-# usersCount = 4
-
-deleteUserMsg = 'Are you sure you want to delete this user ? \n\t         [  {0}  ]'
-licenseOnOffMsg = 'Are you sure you want to turn [ {0} ]  [ {1} ]  license ?'
-removeAllUsersMsg = 'Are you sure you want to remove ALL users ?'
-licenseOnOffAllUsersMsg = 'Are you sure you want to set all license [ {0} ] ?'
 
 class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
@@ -124,7 +84,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.updateDomainBtn = QtGui.QPushButton(self.registerDomainNameGroup)
         self.updateDomainBtn.setObjectName("updateDomainBtn")
         self.updateDomainBtn.setAccessibleName("updateDomainBtn")
-        self.updateDomainBtn.setText(self.setBtnText(self.updateDomainBtn.accessibleName(),true))   
+        self.updateDomainBtn.setText(self.setBtnText(self.updateDomainBtn.accessibleName(),gc.true))   
         self.horizontalLayout_2.addWidget(self.updateDomainBtn)
 
         # - Activate all licenses button
@@ -133,7 +93,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.activateAllBtn.setMaximumSize(QtCore.QSize(40,24))
         self.activateAllBtn.setObjectName("activateAllBtn")
         self.activateAllBtn.setAccessibleName("activateAllBtn")
-        self.activateAllBtn.setText(self.setBtnText(self.activateAllBtn.accessibleName(),true))
+        self.activateAllBtn.setText(self.setBtnText(self.activateAllBtn.accessibleName(),gc.true))
         self.activateAllBtn.setToolTip("Activate all users licenses!\n\n***When the current year is over all the licenses will be set to OFF!")
         self.horizontalLayout_4.addWidget(self.activateAllBtn)
 
@@ -147,7 +107,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.removeAllBtn.setMaximumSize(QtCore.QSize(40,24))
         self.removeAllBtn.setObjectName("removeAllBtn")
         self.removeAllBtn.setAccessibleName("removeAllBtn")
-        self.removeAllBtn.setText(self.setBtnText(self.removeAllBtn.accessibleName(),true))
+        self.removeAllBtn.setText(self.setBtnText(self.removeAllBtn.accessibleName(),gc.true))
         self.removeAllBtn.setToolTip("Remove all users !\n")
         self.horizontalLayout_4.addWidget(self.removeAllBtn)
 
@@ -217,27 +177,27 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.text = ""
 
         if (buttonName == "deleteBtn"):
-            self.text = removeBtnText
+            self.text = gc.removeBtnText
             self.deleteBtn.setStyleSheet("#deleteBtn {background-color: #fe0000;} #deleteBtn:pressed {background-color: #444444; color: white;}")
 
         if (buttonName == "licenseBtn"):
             if (currentStatus == "true"):
-                self.text = licenseOnText
+                self.text = gc.licenseOnText
                 self.onOffBtn.setStyleSheet("#licenseBtn {background-color: #6dae2e;} #licenseBtn:pressed {background-color: #444444; color: white;}")
             else:
-                self.text = licenseOffText
+                self.text = gc.licenseOffText
                 self.onOffBtn.setStyleSheet("#licenseBtn {background-color: #fe0000;} #licenseBtn:pressed {background-color: #444444; color: white;}")
 
         if(buttonName == "updateDomainBtn"):
-            self.text = updateBtnText
+            self.text = gc.updateBtnText
             self.updateDomainBtn.setStyleSheet("#updateDomainBtn:pressed { background-color: #0078d7; color:white }")  
 
         if(buttonName == "activateAllBtn"):
-            self.text = activateAllText
+            self.text = gc.activateAllText
             self.activateAllBtn.setStyleSheet("#activateAllBtn {font-size: 16px; background-color: #6dae2e; color:white;} #activateAllBtn:pressed {background-color: #444; color:white;}")
             
         if(buttonName == "removeAllBtn"):
-            self.text = removeAllText
+            self.text = gc.removeAllText
             self.removeAllBtn.setStyleSheet("#removeAllBtn {font-size: 20px; background-color: #fe0000; color:white;} #removeAllBtn:pressed {background-color: #444; color:white;}")
 
         return self.text
@@ -296,16 +256,16 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.tableWidget.clearSelection()
 
         #read ini file
-        self.licenseFileInfo = self.readConfigFile(licenseFile)
+        self.licenseFileInfo = self.readConfigFile(gc.licenseFile)
         
         #init empty user object
         self.currentUser = dict({
-            keyAccount : "",
-            keyId : "",
-            keyName : "",
-            keyRole : "",
-            keyLic : "",
-            keyReg : "",
+            gc.keyAccount : "",
+            gc.keyId : "",
+            gc.keyName : "",
+            gc.keyRole : "",
+            gc.keyLic : "",
+            gc.keyReg : "",
         })
 
         self.currentUserName = self.registerNameField.text()
@@ -323,25 +283,25 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         if (self.licenseFileInfo.has_section(self.currentUserAccount) == False and self.isValidate):
 
             #collect info
-            self.currentUser[keyAccount] = self.currentUserAccount
-            self.currentUser[keyName] = self.registerNameField.text()
-            self.currentUser[keyRole] = self.registerRoleField.text()
-            self.currentUser[keyLic] = false
-            self.currentUser[keyReg] = self.calcRegToDate()
-            self.currentUser[keyId] = self.generateUUID(self.currentUser[keyAccount],self.currentUser[keyName],self.currentUser[keyRole])
+            self.currentUser[gc.keyAccount] = self.currentUserAccount
+            self.currentUser[gc.keyName] = self.registerNameField.text()
+            self.currentUser[gc.keyRole] = self.registerRoleField.text()
+            self.currentUser[gc.keyLic] = gc.false
+            self.currentUser[gc.keyReg] = self.calcRegToDate()
+            self.currentUser[gc.keyId] = self.generateUUID(self.currentUser[gc.keyAccount],self.currentUser[gc.keyName],self.currentUser[gc.keyRole])
 
 
             #create section and set values
-            self.licenseFileInfo.add_section(self.currentUser[keyAccount])
+            self.licenseFileInfo.add_section(self.currentUser[gc.keyAccount])
 
             for index, (key,value) in enumerate(self.currentUser.items()):
                 
-                if(key == keyAccount):
+                if(key == gc.keyAccount):
                     continue
                 
-                self.licenseFileInfo.set(self.currentUser[keyAccount],key,str(value))
+                self.licenseFileInfo.set(self.currentUser[gc.keyAccount],key,str(value))
 
-            with open(licenseFile,"w") as lic:
+            with open(gc.licenseFile,"w") as lic:
                 self.licenseFileInfo.write(lic)
 
             # self.registerUserBtn.setStyleSheet("#registerUserBtn {background-color: #6dae2e;}")
@@ -371,12 +331,6 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
                 break
 
-
-
-
-
-
-        
 
     # - Generate UUID according name,account,role,current time
     def generateUUID(self,account,name,role):
@@ -408,26 +362,26 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
         # format the message accorrding passed msg
         if(msg.__contains__("delete")):
-            self.theMsg = deleteUserMsg.format(self.currentAccount)
+            self.theMsg = gc.deleteUserMsg.format(self.currentAccount)
 
         elif(msg.__contains__("license")):
             self.clickedBtnText = self.focusOnClickedWidget().text()
             #get text of the button then passed opposite to the message
-            if(self.clickedBtnText == licenseOffText):
-                self.theMsg = licenseOnOffMsg.format(licenseOnText,self.currentAccount)
-            elif(self.clickedBtnText == licenseOnText ):
-                self.theMsg = licenseOnOffMsg.format(licenseOffText,self.currentAccount)
+            if(self.clickedBtnText == gc.licenseOffText):
+                self.theMsg = gc.licenseOnOffMsg.format(gc.licenseOnText,self.currentAccount)
+            elif(self.clickedBtnText == gc.licenseOnText ):
+                self.theMsg = gc.licenseOnOffMsg.format(gc.licenseOffText,self.currentAccount)
 
         elif(msg.__contains__("ALL")):
-            self.theMsg = removeAllUsersMsg
+            self.theMsg = gc.removeAllUsersMsg
         
         elif(msg.__contains__("onOffAllLicense")):
             self.clickedBtnText = self.focusOnClickedWidget().text()
             #get text of the button then passed opposite to the message
             if(self.clickedBtnText == "-"):
-                self.theMsg = licenseOnOffAllUsersMsg.format(licenseOnText)
+                self.theMsg = gc.removeAllUsersMsg.format(gc.licenseOnText)
             elif(self.clickedBtnText == "+"):
-                self.theMsg = licenseOnOffAllUsersMsg.format(licenseOffText)
+                self.theMsg = gc.removeAllUsersMsg.format(gc.licenseOffText)
         
         # message to confirm delete process
         self.yesNoBox = QtGui.QMessageBox(
@@ -447,7 +401,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
     def deleteUser(self):
 
         #read ini files
-        self.licenseFileInfo = self.readConfigFile(licenseFile)
+        self.licenseFileInfo = self.readConfigFile(gc.licenseFile)
 
         # get focus on table buttons
         self.btnDeleteIndex = self.tableWidget.indexAt(self.focusOnClickedWidget().pos())
@@ -456,14 +410,14 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.currentAccount = self.tableWidget.item(self.btnDeleteIndex.row(), 2).text()
 
         # message method to confirm delete process
-        self.confirmDelete = self.message(deleteUserMsg)
+        self.confirmDelete = self.message(gc.deleteUserMsg)
 
         if(self.confirmDelete == QtGui.QMessageBox.Yes):
 
             # Delete ini record
             self.licenseFileInfo.remove_section(self.currentAccount)
 
-            with open(licenseFile,'w') as output_file:
+            with open(gc.licenseFile,'w') as output_file:
                 self.licenseFileInfo.write(output_file)
 
             # Delete row
@@ -477,7 +431,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
     # - Activate or Deactivate user license
     def activateDeactivateLicense(self):
         #read ini files
-        self.licenseFileInfo = self.readConfigFile(licenseFile)
+        self.licenseFileInfo = self.readConfigFile(gc.licenseFile)
 
         # get focus on table buttons
         self.btnDeleteIndex = self.tableWidget.indexAt(self.focusOnClickedWidget().pos())
@@ -486,21 +440,21 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.currentAccount = self.tableWidget.item(self.btnDeleteIndex.row(), 2).text()
 
         #message method to confirm delete process
-        self.confirmDelete = self.message(licenseOnOffMsg)
+        self.confirmDelete = self.message(gc.licenseOnOffMsg)
 
         if (self.confirmDelete == QtGui.QMessageBox.Yes):
             
             # Change license - on or off
-            self.currentLicenseStatus = self.licenseFileInfo.get(self.currentAccount,keyLic)
+            self.currentLicenseStatus = self.licenseFileInfo.get(self.currentAccount,gc.keyLic)
 
             # set to OFF
-            if(self.currentLicenseStatus == true):
-                self.licenseFileInfo.set(self.currentAccount,keyLic,false)
+            if(self.currentLicenseStatus == gc.true):
+                self.licenseFileInfo.set(self.currentAccount,gc.keyLic,gc.false)
             # set to ON
-            elif(self.currentLicenseStatus == false):
-                self.licenseFileInfo.set(self.currentAccount,keyLic,true)
+            elif(self.currentLicenseStatus == gc.false):
+                self.licenseFileInfo.set(self.currentAccount,gc.keyLic,gc.true)
 
-            with open(licenseFile,'w') as output_file:
+            with open(gc.licenseFile,'w') as output_file:
                 self.licenseFileInfo.write(output_file)
 
             #populate table
@@ -516,7 +470,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.tableWidget.clearSelection()
 
         #read ini files
-        self.licenseFileInfo = self.readConfigFile(licenseFile)
+        self.licenseFileInfo = self.readConfigFile(gc.licenseFile)
 
         #get all sections and filter them
         self.users = self.licenseFileInfo.sections()
@@ -545,7 +499,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
                     # set to OFF
                     if (self.isLicenseExist):   
-                        self.licenseFileInfo.set(section,keyLic,false)
+                        self.licenseFileInfo.set(section,gc.keyLic,gc.false)
 
                 self.activateAllBtn.setText("-")
                 self.activateAllBtn.setStyleSheet("#activateAllBtn {font-size: 20px; background-color:  #fe0000; color:white;} #activateAllBtn:pressed {background-color: #444; color:white;}")
@@ -559,13 +513,13 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
                     # set to ON
                     if (self.isLicenseExist):   
-                        self.licenseFileInfo.set(section,keyLic,true)
+                        self.licenseFileInfo.set(section,gc.keyLic,gc.true)
                     
                 self.activateAllBtn.setText("+")
                 self.activateAllBtn.setStyleSheet("#activateAllBtn {font-size: 16px; background-color: #6dae2e; color:white;} #activateAllBtn:pressed {background-color: #444; color:white;}")
 
 
-            with open(licenseFile,'w') as output_file:
+            with open(gc.licenseFile,'w') as output_file:
                 self.licenseFileInfo.write(output_file)
 
             #populate table
@@ -580,7 +534,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.tableWidget.clearSelection()
 
         #read ini files
-        self.licenseFileInfo = self.readConfigFile(licenseFile)
+        self.licenseFileInfo = self.readConfigFile(gc.licenseFile)
 
         #get all sections and filter them
         self.users = self.licenseFileInfo.sections()
@@ -594,7 +548,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
              self.users
              )
         
-        self.confirmDelete = self.message(removeAllUsersMsg)
+        self.confirmDelete = self.message(gc.removeAllUsersMsg)
 
         if (self.confirmDelete == QtGui.QMessageBox.Yes):
             
@@ -602,7 +556,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
             for section in self.filteredSections:
                 self.licenseFileInfo.remove_section(section)
 
-            with open(licenseFile,'w') as output_file:
+            with open(gc.licenseFile,'w') as output_file:
                 self.licenseFileInfo.write(output_file)
 
             #populate table
@@ -634,19 +588,19 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
     # get single user info
     def getUser(self,name):
         
-        self.licenseFileInfo = self.readConfigFile(licenseFile)
+        self.licenseFileInfo = self.readConfigFile(gc.licenseFile)
 
         self.isAccount = self.licenseFileInfo.has_section(name)
 
         if (self.isAccount):
 
             # ["1","Borislav","BorisoB","admin","2022","true","Remove"]
-            self.userId = self.licenseFileInfo.get(name,keyId)
-            self.firstName = self.licenseFileInfo.get(name,keyName)
+            self.userId = self.licenseFileInfo.get(name,gc.keyId)
+            self.firstName = self.licenseFileInfo.get(name,gc.keyName)
             self.accountName = name
-            self.role = self.licenseFileInfo.get(name,keyRole)
-            self.regTo = self.licenseFileInfo.get(name,keyReg)
-            self.currentStatus = self.licenseFileInfo.get(name,keyLic)
+            self.role = self.licenseFileInfo.get(name,gc.keyRole)
+            self.regTo = self.licenseFileInfo.get(name,gc.keyReg)
+            self.currentStatus = self.licenseFileInfo.get(name,gc.keyLic)
 
             self.thisUser = [self.userId,self.firstName,self.accountName,self.role,self.regTo,self.currentStatus,""]
             return self.thisUser
@@ -656,7 +610,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
     def getUsers(self):
 
         #read ini file
-        self.licenseFileInfo = self.readConfigFile(licenseFile)
+        self.licenseFileInfo = self.readConfigFile(gc.licenseFile)
 
         #get sections
         self.sections = self.licenseFileInfo.sections()
@@ -696,7 +650,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.realName = ""
         self.role = ""
 
-        self.licenseFileInfo = self.readConfigFile(licenseFile)
+        self.licenseFileInfo = self.readConfigFile(gc.licenseFile)
 
         self.registeredDomain = self.getDomainName()
 
@@ -706,28 +660,28 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
         #is env result username exist 
         self.isUserExist = self.licenseFileInfo.has_section(self.activeUser)
-        self.isOwnerSection = self.licenseFileInfo.has_section(ownerSection)
+        self.isOwnerSection = self.licenseFileInfo.has_section(gc.ownerSection)
 
         #TODO Should make it domain independant
 
         #if user is registered
         if(self.isUserExist):
 
-            self.isAdmin = self.licenseFileInfo.get(self.activeUser, keyRole) == "admin"
-            self.isOwner = self.licenseFileInfo.get(self.activeUser, keyRole) == "owner"
+            self.isAdmin = self.licenseFileInfo.get(self.activeUser, gc.keyRole) == "admin"
+            self.isOwner = self.licenseFileInfo.get(self.activeUser, gc.keyRole) == "owner"
 
             #if admin or owner
             if (self.isAdmin or self.isOwner):
-                self.realName = self.licenseFileInfo.get(self.activeUser, keyName)
-                self.role = self.licenseFileInfo.get(self.activeUser,keyRole)
+                self.realName = self.licenseFileInfo.get(self.activeUser, gc.keyName)
+                self.role = self.licenseFileInfo.get(self.activeUser,gc.keyRole)
 
         # #if owner section- riffraff
         # elif(self.isOwnerSection):
-        #     if (self.licenseFileInfo.get(ownerSection,keyName) == ownerName == self.activeUser):
-        #         self.role = self.licenseFileInfo.get(ownerSection,keyRole)
+        #     if (self.licenseFileInfo.get(gc.ownerSection,gc.keyName) == gc.ownerName == self.activeUser):
+        #         self.role = self.licenseFileInfo.get(gc.ownerSection,gc.keyRole)
 
         #         if (self.role == "owner"):
-        #             self.realName = ownerName
+        #             self.realName = gc.ownerName
         
         self.userInfo = [self.realName,self.role]
 
@@ -758,15 +712,15 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
     def registerDomain(self):
 
         #read license file
-        self.licenseFileInfo = self.readConfigFile(licenseFile)
+        self.licenseFileInfo = self.readConfigFile(gc.licenseFile)
         currentInput = self.registerDomainNameField.text()
 
-        if (self.licenseFileInfo.has_section(domainSection)):
-            if(self.licenseFileInfo.items(domainSection) == [] and currentInput != ""):
+        if (self.licenseFileInfo.has_section(gc.domainSection)):
+            if(self.licenseFileInfo.items(gc.domainSection) == [] and currentInput != ""):
 
-                self.licenseFileInfo.set(domainSection,keyName,currentInput)
+                self.licenseFileInfo.set(gc.domainSection,gc.keyName,currentInput)
                
-                with open(licenseFile,'w') as output_file:
+                with open(gc.licenseFile,'w') as output_file:
                     self.licenseFileInfo.write(output_file)
 
                 self.registerDomainBtn.setStyleSheet("#registerDomainBtn {background-color: #6dae2e;}")
@@ -776,11 +730,11 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
                 self.registerDomainNameField.clear()
                 self.resetStyles()
 
-            elif(self.licenseFileInfo.items(domainSection) != [] and currentInput != ""):
+            elif(self.licenseFileInfo.items(gc.domainSection) != [] and currentInput != ""):
                 self.registerDomainNameField.setText("Domain is already registered!")
                 self.registerDomainNameField.setStyleSheet("color:red")
-                QtCore.QTimer.singleShot(pauseFor, lambda :self.resetStyles())
-                QtCore.QTimer.singleShot(pauseFor, lambda :self.registerDomainNameField.clear())
+                QtCore.QTimer.singleShot(gc.pauseFor, lambda :self.resetStyles())
+                QtCore.QTimer.singleShot(gc.pauseFor, lambda :self.registerDomainNameField.clear())
                          
         self.populateDomain()
         
@@ -788,20 +742,20 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
     # - get domain from a file
     def getDomainName(self):
 
-        domainName = ""
+        gc.domainName = ""
 
-        self.licenseFileInfo = self.readConfigFile(licenseFile)
+        self.licenseFileInfo = self.readConfigFile(gc.licenseFile)
 
-        self.hasDomainSect = self.licenseFileInfo.has_section(domainSection)
+        self.hasDomainSect = self.licenseFileInfo.has_section(gc.domainSection)
 
         if (self.hasDomainSect == True):
 
-            self.isSectionEmpty = (self.licenseFileInfo.items(domainSection) == [])
+            self.isSectionEmpty = (self.licenseFileInfo.items(gc.domainSection) == [])
 
             if(self.isSectionEmpty == False):
-               domainName = self.licenseFileInfo[domainSection][keyName]
+               gc.domainName = self.licenseFileInfo[gc.domainSection][gc.keyName]
     
-        return domainName
+        return gc.domainName
 
 
     # - set domain to combobox widget
@@ -815,21 +769,21 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
     # - Edit domain name if exist
     def updateDomainName(self):
         #read license file
-        self.licenseFileInfo = self.readConfigFile(licenseFile)
+        self.licenseFileInfo = self.readConfigFile(gc.licenseFile)
 
         #if domain section exist
-        if (self.licenseFileInfo.has_section(domainSection)):
+        if (self.licenseFileInfo.has_section(gc.domainSection)):
 
             currentInput = self.registerDomainNameField.text()
 
-            if (self.licenseFileInfo.items(domainSection) != [] and currentInput != ""):
-                currentRegisteredDomain = self.licenseFileInfo.get(domainSection,keyName)
+            if (self.licenseFileInfo.items(gc.domainSection) != [] and currentInput != ""):
+                currentRegisteredDomain = self.licenseFileInfo.get(gc.domainSection,gc.keyName)
 
                 if (currentRegisteredDomain != ""):
 
-                    self.licenseFileInfo.set(domainSection,keyName,(currentInput + "\\"))
+                    self.licenseFileInfo.set(gc.domainSection,gc.keyName,(currentInput + "\\"))
 
-                    with open(licenseFile,'w') as output_file:
+                    with open(gc.licenseFile,'w') as output_file:
                         self.licenseFileInfo.write(output_file)
                     
                     self.updateDomainBtn.setStyleSheet("#updateDomainBtn {background-color: #6dae2e;}")
@@ -839,14 +793,13 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
                     self.registerDomainNameField.clear()
                     self.resetStyles()
 
-            elif(self.licenseFileInfo.items(domainSection) == [] and currentInput != ""):
+            elif(self.licenseFileInfo.items(gc.domainSection) == [] and currentInput != ""):
                 self.registerDomainNameField.setText("Need to register domain first !")
                 self.registerDomainNameField.setStyleSheet("color:red")
-                QtCore.QTimer.singleShot(pauseFor, lambda :self.resetStyles())
-                QtCore.QTimer.singleShot(pauseFor, lambda :self.registerDomainNameField.clear())
+                QtCore.QTimer.singleShot(gc.pauseFor, lambda :self.resetStyles())
+                QtCore.QTimer.singleShot(gc.pauseFor, lambda :self.registerDomainNameField.clear())
 
         self.populateDomain()
-
 
 
     # - Populate table with users info
@@ -891,9 +844,9 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
                 self.tableWidget.setItem(row, col, item)
 
                 #check role
-                owner = self.role == roles['o']
-                admin = self.role == roles['a']
-                user = self.role == roles['u']
+                owner = self.role == gc.roles['o']
+                admin = self.role == gc.roles['a']
+                user = self.role == gc.roles['u']
 
                 # add license button : column 5 and user or admin
                 if (self.tableColLicense == col and user or self.tableColLicense == col and admin):
@@ -937,8 +890,7 @@ def main():
     mainWin = MainWindow()
     mainWin.core()
 
-  
-    with open((qssFile), 'r') as ss:
+    with open((gc.qssFile), 'r') as ss:
         app.setStyleSheet(ss.read())
 
     app.exec_()
