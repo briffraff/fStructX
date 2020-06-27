@@ -92,7 +92,7 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
 
         # - Users count 
         self.usersCountField = QtGui.QLabel(self.domainFrame)
-        self.usersCountField.setMaximumSize(QtCore.QSize(40,20))
+        self.usersCountField.setMaximumSize(QtCore.QSize(40,18))
         self.usersCountField.setObjectName("usersCountField")
         self.usersCountField.setAccessibleName("usersCountField")
         self.horizontalLayout_4.addWidget(self.usersCountField)
@@ -747,11 +747,30 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         self.licenseFileInfo = self.readConfigFile(gc.licenseFile)
         currentInput = self.registerDomainNameField.text()
 
-        if (self.licenseFileInfo.has_section(gc.domainSection)):
-            if(self.licenseFileInfo.items(gc.domainSection) == [] and currentInput != ""):
+        self.isDomainSection = self.licenseFileInfo.has_section(gc.domainSection)
+
+        # if [DOMAIN] not exist
+        if(self.isDomainSection == False):
+            self.licenseFileInfo.add_section(gc.domainSection)
+
+            with open(gc.licenseFile,'w') as output_file:
+                self.licenseFileInfo.write(output_file)
+
+        self.isDomainSection = self.licenseFileInfo.has_section(gc.domainSection)
+
+        if(self.isDomainSection):
+            self.isDomainSectionEmpty = self.licenseFileInfo.items(gc.domainSection) == []
+
+            self.isInputNotEmpty = currentInput != ""
+
+            if(self.isDomainSectionEmpty == False):  
+                # if __name__ = ""
+                self.isNameOptionEmpty = self.licenseFileInfo.get(gc.domainSection,gc.keyName) == ""
+
+            if((self.isDomainSectionEmpty and self.isInputNotEmpty) or (self.isNameOptionEmpty and self.isInputNotEmpty)):
 
                 self.licenseFileInfo.set(gc.domainSection,gc.keyName,currentInput)
-               
+            
                 with open(gc.licenseFile,'w') as output_file:
                     self.licenseFileInfo.write(output_file)
 
@@ -762,12 +781,13 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
                 self.registerDomainNameField.clear()
                 self.resetStyles()
 
-            elif(self.licenseFileInfo.items(gc.domainSection) != [] and currentInput != ""):
+            elif(self.isDomainSectionEmpty == False and self.isNameOptionEmpty == False and self.isInputNotEmpty):
                 self.registerDomainNameField.setText("Domain is already registered!")
                 self.registerDomainNameField.setStyleSheet("color:red")
                 QtCore.QTimer.singleShot(gc.pauseFor, lambda :self.resetStyles())
                 QtCore.QTimer.singleShot(gc.pauseFor, lambda :self.registerDomainNameField.clear())
-                         
+
+        
         self.populateDomain()
         
 
@@ -803,29 +823,36 @@ class MainWindow(QtGui.QMainWindow,UI_adminPanel):
         #read license file
         self.licenseFileInfo = self.readConfigFile(gc.licenseFile)
 
+        self.isDomainSection = self.licenseFileInfo.has_section(gc.domainSection)
+        
         #if domain section exist
-        if (self.licenseFileInfo.has_section(gc.domainSection)):
+        if (self.isDomainSection):
 
             currentInput = self.registerDomainNameField.text()
 
-            if (self.licenseFileInfo.items(gc.domainSection) != [] and currentInput != ""):
-                currentRegisteredDomain = self.licenseFileInfo.get(gc.domainSection,gc.keyName)
+            self.isInputNotEmpty = currentInput != ""
+            self.isDomainSectionNotEmpty = self.licenseFileInfo.items(gc.domainSection) != []
+            self.isDomainSectionEmpty = self.licenseFileInfo.items(gc.domainSection) == []
 
-                if (currentRegisteredDomain != ""):
+            if (self.isDomainSectionNotEmpty and self.isInputNotEmpty):
+                 #TODO - + if name options exist update domain anyway(doesn matter if empty or not)
 
-                    self.licenseFileInfo.set(gc.domainSection,gc.keyName,(currentInput + "\\"))
+                # currentRegisteredDomain = self.licenseFileInfo.get(gc.domainSection,gc.keyName)
+                # if (currentRegisteredDomain != ""):
 
-                    with open(gc.licenseFile,'w') as output_file:
-                        self.licenseFileInfo.write(output_file)
-                    
-                    self.updateDomainBtn.setStyleSheet("#updateDomainBtn {background-color: #6dae2e;}")
-                    QtCore.QTimer.singleShot(1500, lambda :self.updateDomainBtn.setStyleSheet(
-                        "#updateDomainBtn {background-color: #343434;} #updateDomainBtn:pressed { background-color: #0078d7; color:white; }"))
+                self.licenseFileInfo.set(gc.domainSection,gc.keyName,(currentInput + "\\"))
 
-                    self.registerDomainNameField.clear()
-                    self.resetStyles()
+                with open(gc.licenseFile,'w') as output_file:
+                    self.licenseFileInfo.write(output_file)
+                
+                self.updateDomainBtn.setStyleSheet("#updateDomainBtn {background-color: #6dae2e;}")
+                QtCore.QTimer.singleShot(1500, lambda :self.updateDomainBtn.setStyleSheet(
+                    "#updateDomainBtn {background-color: #343434;} #updateDomainBtn:pressed { background-color: #0078d7; color:white; }"))
 
-            elif(self.licenseFileInfo.items(gc.domainSection) == [] and currentInput != ""):
+                self.registerDomainNameField.clear()
+                self.resetStyles()
+
+            elif(self.isDomainSectionEmpty and self.isInputNotEmpty):
                 self.registerDomainNameField.setText("Need to register domain first !")
                 self.registerDomainNameField.setStyleSheet("color:red")
                 QtCore.QTimer.singleShot(gc.pauseFor, lambda :self.resetStyles())
