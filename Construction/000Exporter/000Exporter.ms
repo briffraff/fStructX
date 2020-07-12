@@ -3,205 +3,251 @@
 -- Programata premestva selektiraniqt obekt na coordinati 0,0,0 i exportva obekta s negovoto ime v papka *.max\obj ,kato .obj
 -- avtor : Borislav Borisov - 'riff-raff'
 -----------------------------------------------------
-try ( destroyDialog ExportAtZero) catch ()
+try ( defilterSelectedNameoyDialog ExportAtZero) catch ()
+
+global scriptName = "000 Exporter"
 
 global selectedObject = ""
 global replacedSymbol = ""
+global fileName = ""
+global exportHere = ""
+
+global reduced = "_Reduced"
+global unreal = "_UE"
+global objExtension = ".obj"
+global fbxExtension = ".fbx"
+global legal_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_" -- legal characters in file name
+
+global toMDFolder = "\\Obj\\MD\\"
+global toWrongNamesFolder = "\\Obj\\WrongNames\\"
+global toUnrealFolder = "\\Obj\\UE\\"
+global toObjFolder = "\\Obj\\"
+
+global noSelectionMsg = "No geometry selected!"
+
+global theClasses = exporterPlugin.classes
+global obj = ObjExp
+global fbx = FBXEXP
 
 rollout ExportAtZero "ExportAtZeroDialogWindow" width:150 height:75  --define a rollout 
-
 (
 	label typeOfGeometry "Select type to export:" pos:[20,5]
 	checkbutton checkObj ".OBJ" pos:[15,25] width:120 height:20
 	checkbutton checkFbx ".FBX" pos:[15,47] width:120 height:20
 
---- FUNCTIONS ---
+	--- FUNCTIONS ---
 	
-fn createObjFolder =
+	--create folders
+	--obj
+	fn createObjFolder =
 	(
-		 objfolder = maxFilePath + "\\Obj\\MD\\"
-		 isFolderExist = doesFileExist objfolder 
-			if	( isFolderExist == false ) then
-				makeDir objfolder all:true 
-	)
-	
-fn createWrongNamesFolder =
-	(
-		 objfolder = maxFilePath + "\\Obj\\WrongNames\\"
-		 isFolderExist = doesFileExist objfolder 
-			if	( isFolderExist == false ) then
-				makeDir objfolder all:true 
+		objfolder = maxFilePath + toMDFolder
+		isFolderExist = doesFileExist objfolder 
+		if	( isFolderExist == false ) then
+			makeDir objfolder all:true 
 	)
 
-fn createUEFolder =
+	--wrong names
+	fn createWrongNamesFolder =
 	(
-		ueFolder = maxFilePath + "\\Obj\\UE\\"
+		objfolder = maxFilePath + toWrongNamesFolder
+		isFolderExist = doesFileExist objfolder 
+		if	( isFolderExist == false ) then
+			makeDir objfolder all:true 
+	)
+
+	--UE
+	fn createUEFolder =
+	(
+		ueFolder = maxFilePath + toUnrealFolder
 		isFolderExist = doesFileExist ueFolder
 			if	( isFolderExist == false ) then
 			makeDir ueFolder all:true
 	)
 
--- fn createFBXFolder =
--- 	(
--- 		 FBXfolder = maxFilePath + "\\FBX\\MD\\"
--- 		 isFolderExist = doesFileExist FBXfolder 
--- 			if	( isFolderExist == false ) then
--- 				makeDir FBXfolder all:true 
--- 	)
-
--- fn createFBXWrongNameFolder =
--- (
--- 	 FBXfolder = maxFilePath + "\\FBX\\WrongNames\\"
--- 	 isFolderExist = doesFileExist FBXfolder 
--- 		if	( isFolderExist == false ) then
--- 			makeDir FBXfolder all:true 
--- )
-
--- fn createFBXUEFolder =
--- (
--- 	ueFolder = maxFilePath + "\\FBX\\UE\\"
--- 	isFolderExist = doesFileExist ueFolder
--- 		if	( isFolderExist == false ) then
--- 		makeDir ueFolder all:true
--- )
-
--- adding a smoothing groups
-fn clearSG =
+	-- clear smoothing groups
+	fn clearSG currentSelection =
 	(
 		try
 		(
-			local numFaces = polyop.getNumfaces $
+			local numFaces = polyop.getNumfaces currentSelection
 			local faces = (for i in 1 to numFaces collect i) as bitarray
-			polyOp.setFaceSmoothGroup $ faces 1
+			polyOp.setFaceSmoothGroup currentSelection faces 1
 		)
 		catch
 		(
 		)
 	)
 	
-fn checkForBulgarianChars fileName = -- fname must be just filename, no path....
-(
-	local legal_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-" -- illegal characters in file name
-	local res = copy fileName
-	
-	-- make sure the object name is legal for a filename
-	local count = res.count
-	
-	for i = 1 to count do
+	fn checkForBulgarianChars currentSelection = -- fname must be just filename, no path....
 	(
-		if (findString legal_characters res[i]) == undefined do -- replace illegal characters with *
+		local curSel = copy currentSelection
+		local count = curSel.count
+		
+		--check if all chars are valid
+		for i = 1 to count do
 		(
-			res[i] = "*"
-			replacedSymbol = "*"
+			if (findString legal_characters curSel[i]) == undefined do -- replace illegal characters with *
+			(
+				replacedSymbol = "*"
+				curSel[i] = replacedSymbol
+			)
 		)
-	)
-	--
-	res
-	selection[1].name = res
-	--print replacedSymbol
-	
--- 	if (replacedSymbol.count >= 1 and replacedSymbol == "*") then
--- 	(
--- 		messagebox "The name contains non latin letters ! Search for '*' "
--- 	)
-)
 
+		--curSel
+		selection[1].name = curSel
+
+		local isOk = false
+		if(replacedSymbol.count == 0 and replacedSymbol == "") then
+		(
+			isOk = true
+		)
+		else
+		(
+			isOk = false
+		)
+
+		return isOk
+	)
+
+	fn cloneAndPlaceToZero = 
+	(
+		maxOps.cloneNodes $ cloneType:#copy newNodes:&nnl
+		select nnl
+		$.pos = [0,0,0]
+	)
+	
+	fn letExport fileName exportHere classIndex =
+	(
+		--check for cyr
+		local readyToExport = checkForBulgarianChars fileName
+
+		if (readyToExport == true) then
+		(
+			-- with *.OBJ export dialog
+			exportFile (exportHere) selectedOnly:true  using:theClasses[classIndex]
+			
+			-- set face smooth groups
+			clearSG fileName
+
+			--delete objects
+			max delete
+		)
+		else
+		(
+			messagebox "The name contains NON LATIN symbols ! Search for '*' " title:"WRONG SYMBOLS"
+			
+			--delete objects
+			max delete
+			
+			replacedSymbol = ""
+		)
+
+	)
+	----------------------------------------------------------------------------------------------------------
+	----EVENTS---
+
+	-- OBJ
 	on checkObj changed exportObj do
 	(
 		if (exportObj == true and selection.count == 1) then
 		(
+			--create needed folders
 			createObjFolder()
 			createWrongNamesFolder()
 			createUEFolder()
-			
+
+			--selected object
 			selectedObject = selection[1]
-						
-			maxOps.cloneNodes $ cloneType:#copy newNodes:&nnl
-			select nnl
-			$.pos = [0,0,0]
 			
-			-- creating of variable with class of exporter plugins
-			local theClasses = exporterPlugin.classes
+			--get export class index
+			local objClassIndex = findItem theClasses obj
 
-			local objClassIndex = findItem theClasses ObjExp
-
-			local str = filterString selection[1].name "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvvxyz1234567890-"
+			-- filter legal characters - remove "_"
+			local legalCharacterMinusUnderScoreDivider = substring legal_characters 1 (legal_characters.count-1)
 			--#("_", "_", "_", "_")
-			local suffixCount = str.count
+			local filterSelectedName = filterString selectedObject.name legalCharacterMinusUnderScoreDivider
 			--4
-			local suffix = str[str.count]
-			--"_"
-			local suffixReduced = suffix + "Reduced"
-			--"_Reduced"
-			
-			local suffixUE = suffix + "UE"
-			--"_UE"
-			
-			if(suffixCount == 4 and matchpattern selectedObject.name pattern:"*_*_*_*_UE") then
-			(
-				local fileName = selectedObject.name
-				local pathHere = maxFilePath + "\\Obj\\UE\\"
-				local objSavePath = pathHere + (substring fileName 1(fileName.count - 3))
-			)
-			else if(suffixCount == 4 and suffix == "_" or suffixCount == 4 and suffixReduced == "_Reduced") then
-			(
-				local fileName = selectedObject.name
-				local pathHere = maxFilePath + "\\Obj\\"
-				local objSavePath = pathHere + fileName 
-			)
-			else if (suffixCount == 3 and matchpattern selectedObject.name pattern:"*_*_*_*") then
-			(
-				local fileName = selectedObject.name
-				local pathHere = maxFilePath + "\\Obj\\MD\\"
-				local objSavePath = pathHere + fileName 
-			)
-			else
-			(
-				local fileName = selectedObject.name
-				local pathHere = maxFilePath + "\\Obj\\WrongNames\\"
-				local objSavePath = pathHere + fileName 
-			)
-			
-			fileName = selection[1].name
-			checkForBulgarianChars fileName
-						
-			if (replacedSymbol.count == 0 and replacedSymbol == "") then
-			(	
-				-- with *.OBJ export dialog
-				exportFile (objSavePath ) selectedOnly:true  using:theClasses[objClassIndex]
-				
-				-- set face smooth groups
-				clearSG()
+			local underscoresCount = filterSelectedName.count
+			--elements of the name
+			local selectionElementsCount = (FilterString selectedObject.name "_").count
 
-				--delete objects
-				actionMan.executeAction 0 "40020"
+			if (underscoresCount >= 1) then
+			(
+							
+				--"_"
+				local suffix = filterSelectedName[underscoresCount]
+				--"_Reduced"
+				local suffixReduced = suffix + "Reduced"
+				--"_UE"
+				local suffixUE = suffix + "UE"
+
+				-- name patterns
+				local rowPattern = matchpattern selectedObject.name pattern:"SM_*_*_*"
+				local weldedPattern = matchpattern selectedObject.name pattern:"SM_*_*_*_"
+				local reducedPattern = matchpattern selectedObject.name pattern:"SM_*_*_*_Reduced"
+				local uePattern = matchpattern selectedObject.name pattern:"SM_*_*_*_UE"
+
+				-- to MD folder
+				if(selectionElementsCount == 4 and underscoresCount == 3 and rowPattern) then
+				(
+					fileName = selectedObject.name
+					exportHere = maxFilePath + toMDFolder + fileName + objExtension
+					print "MD"
+				)
+				-- to Obj folder
+				else if(underscoresCount == 4 and suffix == "_" and weldedPattern or 
+					underscoresCount == 4 and selectionElementsCount == 5 and suffixReduced == reduced and reducedPattern) then
+				(
+					fileName = selectedObject.name
+					exportHere = maxFilePath + toObjFolder + fileName + objExtension
+					print "Obj"
+				)
+				--to UE folder
+				else if(underscoresCount == 4 and suffixUE == unreal and uePattern) then
+				(
+					fileName = selectedObject.name
+					exportHere = maxFilePath + toUnrealFolder + (substring fileName 1(fileName.count - 3)) + objExtension
+					print "UE"
+				)	
+				else
+				(
+					fileName = selectedObject.name
+					exportHere = maxFilePath + toWrongNamesFolder + fileName + objExtension
+					print "WrongNames"
+				)
+
+				--To 0,0,0
+				cloneAndPlaceToZero()
+
+				--EXPORT
+				letExport fileName exportHere objClassIndex			
 			)
 			else
 			(
-				messagebox "The name contains NON LATIN symbols ! Search for '*' " title:"WRONG SYMBOLS"
-				
-				--delete objects
-				actionMan.executeAction 0 "40020"
-				
-				replacedSymbol = ""
+				messageBox "Object name is wrong!" title:scriptName beep:false
 			)
-		)
-			
+				
+		)	
 		else
 		(
-			messagebox "No geometry selected!" title:"000 Exporter message"
+			--if no selection
+			messagebox noSelectionMsg title:scriptName
 		)
+
+		--deselect button
 		checkObj.state = false	
 	)
 	
+
+
+
+
+	-- FBX
 	on checkFbx changed exportFbx do
 	(
 		if (exportFbx == true and selection.count == 1) then
 		(
--- 			createFBXFolder()
--- 			createFBXWrongNameFolder()
--- 			createFBXUEFolder()
-
 			selectedObject = selection[1]
 						
 			maxOps.cloneNodes $ cloneType:#copy newNodes:&nnl
@@ -211,13 +257,13 @@ fn checkForBulgarianChars fileName = -- fname must be just filename, no path....
 			-- creating of variable with class of exporter plugins
 			local theClasses = exporterPlugin.classes
 
-			local fbxClassIndex = finditem theClasses FBXEXP
+			local fbxClassIndex = finditem theClasses fbx
 			
-			local str = filterString selection[1].name "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvvxyz 1234567890 -"
+			local filterSelectedName = filterString selection[1].name "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvvxyz 1234567890 -"
 			--#("_", "_", "_", "_")
-			local suffixCount = str.count
+			local underscoresCount = filterSelectedName.count
 			--4
-			local suffix = str[str.count]
+			local suffix = filterSelectedName[filterSelectedName.count]
 			--"_"
 			local suffixReduced = suffix + "Reduced"
 			--"_Reduced"
@@ -225,29 +271,29 @@ fn checkForBulgarianChars fileName = -- fname must be just filename, no path....
 			local suffixUE = suffix + "UE"
 			--"_UE"
 						
-			if(suffixCount == 4 and matchpattern selectedObject.name pattern:"*_*_*_*_UE") then
+			if(underscoresCount == 4 and matchpattern selectedObject.name pattern:"*_*_*_*_UE") then
 			(
 				local fileName = selectedObject.name
-				local pathHere = maxFilePath + "\\Obj\\UE\\"
-				local objSavePath = pathHere + fileName 
+				local exportHere = maxFilePath + "\\Obj\\UE\\"
+				local objSavePath = exportHere + fileName 
 			)
-			else if(suffixCount == 4 and suffix == "_" or suffixCount == 4 and suffixReduced == "_Reduced") then
+			else if(underscoresCount == 4 and suffix == "_" or underscoresCount == 4 and suffixReduced == "_Reduced") then
 			(
 				local fileName = selectedObject.name
-				local pathHere = maxFilePath + "\\Obj\\"
-				local objSavePath = pathHere + fileName 
+				local exportHere = maxFilePath + "\\Obj\\"
+				local objSavePath = exportHere + fileName 
 			)
-			else if (suffixCount == 3 and matchpattern selectedObject.name pattern:"*_*_*_*") then
+			else if (underscoresCount == 3 and matchpattern selectedObject.name pattern:"*_*_*_*") then
 			(
 				local fileName = selectedObject.name
-				local pathHere = maxFilePath + "\Obj\\MD\\"
-				local objSavePath = pathHere + fileName 
+				local exportHere = maxFilePath + "\Obj\\MD\\"
+				local objSavePath = exportHere + fileName 
 			)
 			else
 			(
 				local fileName = selectedObject.name
-				local pathHere = maxFilePath + "\\Obj\\WrongNames\\"
-				local objSavePath = pathHere + fileName 
+				local exportHere = maxFilePath + "\\Obj\\WrongNames\\"
+				local objSavePath = exportHere + fileName 
 			)
 			
 			fileName = selection[1].name
